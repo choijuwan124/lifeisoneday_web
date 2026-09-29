@@ -1,0 +1,18 @@
+# OS / editor
+.DS_Store
+.idea/
+.vscode/
+*.iml
+
+# Java / Gradle
+backend/.gradle/
+backend/build/
+*.class
+
+# Environment and secrets
+.env
+.env.*
+!*.env.example
+
+# Frontend dependencies
+frontend/node_modules/
