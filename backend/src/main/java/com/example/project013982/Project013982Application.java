@@ -1,11 +1,13 @@
-package com.lifeisoneday;
+package com.example.project013982;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class LifeIsOneDayApplication {
+public class Project013982Application {
+
     public static void main(String[] args) {
-        SpringApplication.run(LifeIsOneDayApplication.class, args);
+        SpringApplication.run(Project013982Application.class, args);
     }
+
 }
