@@ -48,17 +48,8 @@
 
 ### Backend
 
-MySQL에 `lifeisoneday` 데이터베이스를 만든 뒤 환경 변수를 설정합니다.
-
-```bash
-export DB_USERNAME=본인DB아이디
-export DB_PASSWORD=본인DB비밀번호
-```
-
-그 후 `backend` 폴더에서 실행합니다.
+`backend/src/main/resources/application.properties`에 MySQL 연결 설정을 추가한 뒤 `backend` 폴더에서 실행합니다.
 
 ```bash
 ./gradlew bootRun
 ```
-
-> Gradle Wrapper는 백엔드 담당자가 IntelliJ에서 Gradle 프로젝트를 연 뒤 생성하여 함께 커밋합니다.
