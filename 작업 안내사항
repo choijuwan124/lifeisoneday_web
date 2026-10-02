@@ -1,0 +1,92 @@
+# 팀 Git 작업 안내
+
+## 저장소
+
+- Repository: https://github.com/choijuwan124/lifeisoneday_web
+- GitHub 아이디를 팀장에게 전달하고 Collaborator 초대를 수락한다.
+- 초대를 수락해야 브랜치 생성 및 코드 업로드가 가능하다.
+
+## 최초 1회: 프로젝트 내려받기
+
+터미널에서 실행한다.
+
+```bash
+cd ~/Desktop
+git clone https://github.com/choijuwan124/lifeisoneday_web.git
+cd lifeisoneday_web
+code .
+```
+
+`code .`가 실행되지 않으면 Finder에서 `Desktop/lifeisoneday_web` 폴더를 VS Code로 연다.
+
+## 폴더 구조
+
+```text
+lifeisoneday_web/
+├── frontend/     # HTML, CSS, JavaScript
+├── backend/      # Spring Boot
+├── docs/         # ERD, API 명세 등 문서
+├── .gitignore
+└── main.md
+```
+
+## 작업 시작 전
+
+항상 최신 `main` 코드를 받은 뒤 작업 브랜치를 만든다.
+
+```bash
+cd ~/Desktop/lifeisoneday_web
+git switch main
+git pull origin main
+git switch -c feat/기능이름
+```
+
+브랜치 예시:
+
+```text
+feat/signup
+feat/login-page
+feat/group-create
+feat/diary-create
+feat/diary-update
+feat/invite-member
+feat/leave-group
+```
+
+## 작업 후
+
+기능 하나를 구현하고 실행 확인한 뒤 업로드한다.
+
+```bash
+git status
+git add .
+git commit -m "feat: 구현한 기능 설명"
+git push -u origin 현재브랜치이름
+```
+
+예시:
+
+```bash
+git add .
+git commit -m "feat: 로그인 화면 구현"
+git push -u origin feat/login-page
+```
+
+## Pull Request
+
+1. GitHub 저장소에 접속한다.
+2. `Compare & pull request` 버튼을 누른다.
+3. `feat/내브랜치 → main`인지 확인한다.
+4. Pull Request를 생성한다.
+5. 단톡방에 PR 주소와 작업 내용을 공유한다.
+6. 팀장 확인 후 `main`에 Merge한다.
+
+## 규칙
+
+- `main` 브랜치에서 직접 작업하거나 push하지 않는다.
+- 기능 하나당 브랜치 하나를 만든다.
+- 작업 시작 전에는 `git pull origin main`을 실행한다.
+- 기능 단위로 commit, push, Pull Request를 만든다.
+- 같은 파일을 수정해야 하면 단톡방에 먼저 공유한다.
+- 공통 파일, DB 설정 파일, API 형식을 수정할 때는 팀원에게 알린다.
+- 오류가 나면 오래 혼자 해결하지 말고 오류 화면과 `git status` 결과를 공유한다.
