@@ -92,7 +92,7 @@ backend/src/main/java/com/lifeisoneday/web/
 
 ---
 
-## 민재 — 단체 일기장 생성 / 조회 / 삭제
+## 민제 — 단체 일기장 생성 / 조회 / 삭제
 
 ```text
 frontend/
