@@ -1,0 +1,256 @@
+# Life Is One Day 개발 순서 및 파일 담당
+
+## 전체 개발 순서
+
+```text
+공통 설정
+→ 회원가입
+→ 로그인 / 로그아웃
+→ 단체 일기장 / 멤버 데이터 구조
+→ 단체 일기장 생성 / 목록 / 상세
+→ 친구 초대 / 방 나가기
+→ 일기 작성 / 조회
+→ 일기 수정 / 삭제
+→ 전체 연결 / 테스트 / 발표 준비
+```
+
+---
+
+## 0단계 — 공통 설정
+
+```text
+.gitignore                                                      — 주완
+backend/build.gradle                                            — 주완
+backend/src/main/resources/application.yml                      — 주완
+backend/src/main/resources/application-local.yml                — 주완
+backend/src/main/java/com/lifeisoneday/web/config/CorsConfig.java — 주완
+backend/src/main/java/com/lifeisoneday/web/common/ApiResponse.java — 주완
+backend/src/main/java/com/lifeisoneday/web/common/GlobalExceptionHandler.java — 주완
+frontend/common/index.html                                      — 주완
+frontend/common/api.js                                          — 주완
+frontend/common/common.css                                      — 주완
+docs/feature-spec.md                                            — 주완
+docs/api-spec.md                                                — 주완
+docs/erd.md                                                     — 주완
+docs/team-guide.md                                              — 주완
+```
+
+```text
+공통 설정 완료
+→ 회원가입 / 로그인 개발 시작
+```
+
+---
+
+## 1단계 — 회원가입
+
+```text
+backend/src/main/java/com/lifeisoneday/web/user/User.java       — 현준
+backend/src/main/java/com/lifeisoneday/web/user/UserRepository.java — 현준
+backend/src/main/java/com/lifeisoneday/web/user/UserService.java — 현준
+
+backend/src/main/java/com/lifeisoneday/web/auth/SignupRequest.java — 현준
+backend/src/main/java/com/lifeisoneday/web/auth/AuthService.java — 현준
+backend/src/main/java/com/lifeisoneday/web/auth/AuthController.java — 현준
+
+frontend/auth/signup.html                                       — 현준
+frontend/auth/auth.js                                           — 현준
+frontend/auth/auth.css                                          — 현준
+```
+
+```text
+User Entity
+→ 회원가입 API
+→ 회원가입 화면
+→ 회원가입 화면과 API 연결
+→ commit
+```
+
+---
+
+## 2단계 — 로그인 / 로그아웃
+
+```text
+backend/src/main/java/com/lifeisoneday/web/config/SecurityConfig.java — 현준
+backend/src/main/java/com/lifeisoneday/web/auth/LoginRequest.java — 현준
+backend/src/main/java/com/lifeisoneday/web/auth/AuthService.java — 현준
+backend/src/main/java/com/lifeisoneday/web/auth/AuthController.java — 현준
+
+frontend/auth/login.html                                        — 현준
+frontend/auth/auth.js                                           — 현준
+```
+
+```text
+로그인 API
+→ 로그인 화면
+→ 로그아웃 API
+→ 로그인 화면과 API 연결
+→ commit
+```
+
+---
+
+## 3단계 — 단체 일기장 / 멤버 데이터 구조
+
+```text
+backend/src/main/java/com/lifeisoneday/web/group/DiaryGroup.java — 민재
+backend/src/main/java/com/lifeisoneday/web/group/DiaryGroupRepository.java — 민재
+
+backend/src/main/java/com/lifeisoneday/web/member/GroupMember.java — 용준
+backend/src/main/java/com/lifeisoneday/web/member/GroupMemberRepository.java — 용준
+
+docs/erd.md                                                     — 주완
+```
+
+```text
+DiaryGroup Entity
+→ GroupMember Entity
+→ Repository 생성
+→ 일기장 생성 시 방장 멤버 자동 추가
+→ commit
+```
+
+---
+
+## 4단계 — 단체 일기장 생성 / 목록 / 상세
+
+```text
+backend/src/main/java/com/lifeisoneday/web/group/CreateGroupRequest.java — 민재
+backend/src/main/java/com/lifeisoneday/web/group/GroupResponse.java — 민재
+backend/src/main/java/com/lifeisoneday/web/group/GroupService.java — 민재
+backend/src/main/java/com/lifeisoneday/web/group/GroupController.java — 민재
+
+frontend/group/group-create.html                                — 민재
+frontend/group/group-list.html                                  — 민재
+frontend/group/group-detail.html                                — 민재
+frontend/group/group.js                                         — 민재
+frontend/group/group.css                                        — 민재
+```
+
+```text
+일기장 생성 API
+→ 일기장 목록 API
+→ 일기장 상세 API
+→ 일기장 화면 제작
+→ 프런트와 API 연결
+→ commit
+```
+
+---
+
+## 5단계 — 멤버 목록 / 친구 초대 / 방 나가기
+
+```text
+backend/src/main/java/com/lifeisoneday/web/member/MemberResponse.java — 용준
+backend/src/main/java/com/lifeisoneday/web/member/InviteMemberRequest.java — 용준
+backend/src/main/java/com/lifeisoneday/web/member/MemberService.java — 용준
+backend/src/main/java/com/lifeisoneday/web/member/MemberController.java — 용준
+
+frontend/member/member-manage.html                              — 용준
+frontend/member/member.js                                       — 용준
+frontend/member/member.css                                      — 용준
+```
+
+```text
+멤버 목록 API
+→ 친구 초대 API
+→ 방 나가기 API
+→ 멤버 관리 화면
+→ 프런트와 API 연결
+→ commit
+```
+
+---
+
+## 6단계 — 일기 작성 / 조회
+
+```text
+backend/src/main/java/com/lifeisoneday/web/diary/Diary.java     — 림정
+backend/src/main/java/com/lifeisoneday/web/diary/DiaryRepository.java — 림정
+backend/src/main/java/com/lifeisoneday/web/diary/CreateDiaryRequest.java — 림정
+backend/src/main/java/com/lifeisoneday/web/diary/DiaryResponse.java — 림정
+backend/src/main/java/com/lifeisoneday/web/diary/DiaryService.java — 림정
+backend/src/main/java/com/lifeisoneday/web/diary/DiaryController.java — 림정
+
+frontend/diary/diary-create.html                                — 림정
+frontend/diary/diary-list.html                                  — 림정
+frontend/diary/diary-detail.html                                — 림정
+frontend/diary/diary.js                                         — 림정
+frontend/diary/diary.css                                        — 림정
+```
+
+```text
+Diary Entity
+→ 일기 작성 API
+→ 일기 목록 API
+→ 일기 상세 API
+→ 일기 화면 제작
+→ 프런트와 API 연결
+→ commit
+```
+
+---
+
+## 7단계 — 일기 수정 / 삭제
+
+```text
+backend/src/main/java/com/lifeisoneday/web/diary/UpdateDiaryRequest.java — 림정
+backend/src/main/java/com/lifeisoneday/web/diary/DiaryService.java — 림정
+backend/src/main/java/com/lifeisoneday/web/diary/DiaryController.java — 림정
+
+frontend/diary/diary-edit.html                                  — 림정
+frontend/diary/diary.js                                         — 림정
+```
+
+```text
+일기 수정 API
+→ 일기 삭제 API
+→ 수정 화면
+→ 수정 / 삭제 버튼 연결
+→ commit
+```
+
+---
+
+## 8단계 — 전체 통합 / 테스트 / 발표 준비
+
+```text
+frontend/common/common.css                                      — 주완
+frontend/common/api.js                                          — 주완
+docs/api-spec.md                                                — 주완
+docs/erd.md                                                     — 주완
+main.md                                                         — 주완
+```
+
+```text
+회원가입
+→ 로그인
+→ 일기장 생성
+→ 친구 초대
+→ 일기 작성
+→ 일기 수정 / 삭제
+→ 방 나가기
+→ 오류 수정
+→ 발표 준비
+```
+
+---
+
+## Git 작업 규칙
+
+```text
+기능 하나 구현
+→ 실행 확인
+→ git add
+→ git commit
+→ git push
+→ Pull Request
+→ main Merge
+→ 다음 기능 개발
+```
+
+```text
+한 번에 전체 기능을 만들지 않는다.
+작은 기능 하나씩 구현하고 commit을 남긴다.
+main 브랜치에서는 직접 작업하지 않는다.
+```
