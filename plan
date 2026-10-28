@@ -71,13 +71,13 @@ User Entity
 ## 2단계 — 로그인 / 로그아웃
 
 ```text
-backend/src/main/java/com/lifeisoneday/web/config/SecurityConfig.java — 현준
-backend/src/main/java/com/lifeisoneday/web/auth/LoginRequest.java — 현준
-backend/src/main/java/com/lifeisoneday/web/auth/AuthService.java — 현준
-backend/src/main/java/com/lifeisoneday/web/auth/AuthController.java — 현준
+backend/src/main/java/com/lifeisoneday/web/config/SecurityConfig.java — 주완
+backend/src/main/java/com/lifeisoneday/web/auth/LoginRequest.java — 주완
+backend/src/main/java/com/lifeisoneday/web/auth/AuthService.java — 주완
+backend/src/main/java/com/lifeisoneday/web/auth/AuthController.java — 주완
 
-frontend/auth/login.html                                        — 현준
-frontend/auth/auth.js                                           — 현준
+frontend/auth/login.html                                        — 주완
+frontend/auth/auth.js                                           — 주완
 ```
 
 ```text
