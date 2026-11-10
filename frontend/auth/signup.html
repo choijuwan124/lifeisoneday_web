@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>회원가입 | Life Is One Day</title>
+    <link rel="stylesheet" href="../css/style.css" />
+    <link rel="stylesheet" href="auth.css" />
+    <script src="../js/api.js" defer></script>
+    <script src="auth.js" defer></script>
+  </head>
+  <body class="auth-page">
+    <header class="site-header">
+      <a class="logo" href="../index.html">Life Is One Day</a>
+      <nav aria-label="주요 메뉴">
+        <a href="../index.html">홈으로</a>
+      </nav>
+    </header>
+
+    <main class="auth-main">
+      <section class="auth-card" aria-labelledby="signup-title">
+        <p class="eyebrow">SHARED DIARY</p>
+        <h1 id="signup-title">함께 기록할 준비가 되었나요?</h1>
+        <p class="auth-description">계정을 만들고 친구들과 소중한 하루를 나눠 보세요.</p>
+
+        <noscript>
+          <p class="auth-message">회원가입을 하려면 브라우저에서 JavaScript를 켜 주세요.</p>
+        </noscript>
+
+        <form id="signup-form" method="post" aria-describedby="signup-message">
+          <div class="auth-field">
+            <label for="username">아이디</label>
+            <input id="username" name="username" type="text" autocomplete="username"
+                   maxlength="50" required aria-describedby="username-help" />
+            <p id="username-help" class="field-help">50자 이내로 입력해 주세요.</p>
+          </div>
+          <div class="auth-field">
+            <label for="password">비밀번호</label>
+            <input id="password" name="password" type="password" autocomplete="new-password"
+                   maxlength="128" required aria-describedby="password-help" />
+            <p id="password-help" class="field-help">128자 이내로 입력해 주세요. 다른 곳에서 쓰지 않는 비밀번호를 권장해요.</p>
+          </div>
+          <div class="auth-field">
+            <label for="nickname">닉네임</label>
+            <input id="nickname" name="nickname" type="text" autocomplete="nickname"
+                   maxlength="50" required aria-describedby="nickname-help" />
+            <p id="nickname-help" class="field-help">친구들에게 보여 줄 이름을 50자 이내로 입력해 주세요.</p>
+          </div>
+          <button id="signup-submit" class="button auth-submit" type="submit" disabled>회원가입</button>
+        </form>
+
+        <p id="signup-message" class="auth-message" role="status" aria-live="polite" aria-atomic="true"></p>
+        <div id="signup-success" class="auth-success" hidden>
+          <p>이제 로그인해서 친구들과 일기를 나눠 보세요.</p>
+          <a id="login-link" class="button" href="login.html">로그인 페이지로 이동</a>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>
