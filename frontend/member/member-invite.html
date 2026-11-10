@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>친구 초대 | Life Is One Day</title>
+    <link rel="stylesheet" href="../css/style.css" />
+  </head>
+  <body class="member-page">
+    <header class="site-header">
+      <a class="logo" href="../index.html">Life Is One Day</a>
+      <nav aria-label="주요 메뉴">
+        <a href="member-list.html">멤버 관리</a>
+      </nav>
+    </header>
+
+    <main class="member-main">
+      <section class="member-card" aria-labelledby="member-invite-title">
+        <p class="eyebrow">SHARED DIARY</p>
+        <h1 id="member-invite-title">친구 초대</h1>
+        <p class="member-description">함께 일기를 쓸 친구의 아이디를 입력하세요.</p>
+
+        <form id="member-invite-form" aria-describedby="member-invite-message">
+          <div class="member-field">
+            <label for="invite-username">친구 아이디</label>
+            <input id="invite-username" name="username" type="text"
+                   maxlength="50" placeholder="초대할 친구의 아이디" required />
+          </div>
+          <button id="member-invite-submit" class="button" type="submit">초대하기</button>
+        </form>
+
+        <p id="member-invite-message" class="member-message" role="status" aria-live="polite"></p>
+
+        <p class="member-back">
+          <a href="member-list.html">← 멤버 관리로 돌아가기</a>
+        </p>
+      </section>
+    </main>
+  </body>
+</html>
