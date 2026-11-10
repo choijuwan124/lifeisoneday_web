@@ -1,6 +1,7 @@
 package com.example.project013982.auth;
 
 import com.example.project013982.common.ApiResponse;
+import com.example.project013982.user.User;
 import com.example.project013982.user.UserService;
 import org.springframework.stereotype.Service;
 
@@ -19,5 +20,12 @@ public class AuthService {
         userService.register(request.username(), request.password(), request.nickname());
         // Account details and password hashes must not be included in the response.
         return ApiResponse.success("회원가입이 완료되었습니다. 로그인해 주세요.", null);
+    }
+
+    public User login(LoginRequest request) {
+        if (request == null) {
+            throw new IllegalArgumentException("로그인 정보를 입력해 주세요.");
+        }
+        return userService.authenticate(request.username(), request.password());
     }
 }

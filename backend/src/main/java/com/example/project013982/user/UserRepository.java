@@ -7,6 +7,8 @@ import org.springframework.stereotype.Repository;
 
 import java.sql.PreparedStatement;
 import java.sql.Statement;
+import java.util.List;
+import java.util.Optional;
 
 @Repository
 public class UserRepository {
@@ -20,6 +22,18 @@ public class UserRepository {
         Long count = jdbcTemplate.queryForObject(
                 "SELECT COUNT(*) FROM users WHERE username = ?", Long.class, username);
         return count != null && count > 0;
+    }
+
+    public Optional<User> findByUsername(String username) {
+        List<User> users = jdbcTemplate.query(
+                "SELECT id, username, password_hash, nickname FROM users WHERE username = ?",
+                (resultSet, rowNumber) -> new User(
+                        resultSet.getLong("id"),
+                        resultSet.getString("username"),
+                        resultSet.getString("password_hash"),
+                        resultSet.getString("nickname")),
+                username);
+        return users.stream().findFirst();
     }
 
     public User save(String username, String passwordHash, String nickname) {
