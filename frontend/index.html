@@ -10,8 +10,9 @@
     <header class="site-header">
       <a class="logo" href="index.html">Life Is One Day</a>
       <nav aria-label="주요 메뉴">
-        <a href="#login">로그인</a>
-        <a href="#signup">회원가입</a>
+        <a href="auth/login.html">로그인</a>
+        <a href="auth/signup.html">회원가입</a>
+        <button id="logout-button" type="button">로그아웃</button>
       </nav>
     </header>
 
@@ -25,10 +26,12 @@
         <h1>박민제12</h1>
         <h1>최림정12</h1>
         <p>나의 일상과 소중한 사람들의 이야기를 한 곳에 담는 공유 일기장입니다.</p>
-        <a class="button" href="#signup">시작하기</a>
+        <a class="button" href="auth/signup.html">시작하기</a>
       </section>
     </main>
 
+    <script src="js/api.js"></script>
+    <script src="auth/logout.js"></script>
     <script src="js/app.js"></script>
   </body>
 </html>
