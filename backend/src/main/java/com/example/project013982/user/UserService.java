@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 import java.security.GeneralSecurityException;
+import java.security.MessageDigest;
 import java.security.SecureRandom;
 import java.util.Base64;
 
@@ -37,6 +38,18 @@ public class UserService {
         }
     }
 
+    public User authenticate(String username, String password) {
+        requireValue(username, "아이디", 50);
+        requireValue(password, "비밀번호", 128);
+        String normalizedUsername = username.strip();
+        User user = userRepository.findByUsername(normalizedUsername)
+                .orElseThrow(UserService::invalidLogin);
+        if (!matchesPassword(password, user.passwordHash())) {
+            throw invalidLogin();
+        }
+        return user;
+    }
+
     private static void requireValue(String value, String label, int maxLength) {
         if (value == null || value.isBlank()) {
             throw new IllegalArgumentException(label + "을(를) 입력해 주세요.");
@@ -61,5 +74,34 @@ public class UserService {
         } finally {
             spec.clearPassword();
         }
+    }
+
+    private static boolean matchesPassword(String password, String storedHash) {
+        try {
+            String[] parts = storedHash.split("\\$", -1);
+            if (parts.length != 4 || !"pbkdf2_sha256".equals(parts[0])) {
+                return false;
+            }
+            int iterations = Integer.parseInt(parts[1]);
+            if (iterations <= 0) {
+                return false;
+            }
+            byte[] salt = Base64.getDecoder().decode(parts[2]);
+            byte[] expectedHash = Base64.getDecoder().decode(parts[3]);
+            PBEKeySpec spec = new PBEKeySpec(password.toCharArray(), salt, iterations, expectedHash.length * 8);
+            try {
+                byte[] actualHash = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256")
+                        .generateSecret(spec).getEncoded();
+                return MessageDigest.isEqual(expectedHash, actualHash);
+            } finally {
+                spec.clearPassword();
+            }
+        } catch (IllegalArgumentException | GeneralSecurityException exception) {
+            return false;
+        }
+    }
+
+    private static IllegalArgumentException invalidLogin() {
+        return new IllegalArgumentException("아이디 또는 비밀번호가 올바르지 않습니다.");
     }
 }
