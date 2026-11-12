@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>단체 일기장 | Life Is One Day</title>
     <link rel="stylesheet" href="../css/style.css" />
+    <link rel="stylesheet" href="group.css" />
+    <script src="../js/api.js" defer></script>
+    <script src="group.js" defer></script>
   </head>
   <body>
     <header class="site-header">
@@ -12,17 +15,26 @@
     </header>
 
     <main>
-      <section class="hero" aria-labelledby="group-list-title">
+      <section class="group-page" aria-labelledby="group-list-title">
         <p class="eyebrow">SHARED DIARY</p>
         <h1 id="group-list-title">단체 일기장</h1>
         <p>함께 쓰고 싶은 이야기를 단체 일기장에 기록해 보세요.</p>
-        <a class="button" href="group-create.html">새 일기장 만들기</a>
+        <a class="button group-button" href="group-create.html">새 일기장 만들기</a>
 
-        <section aria-label="단체 일기장 목록">
-          <p>아직 단체 일기장이 없습니다. 새 일기장을 만들어 보세요.</p>
+        <noscript>
+          <p class="group-message" role="alert">단체 일기장 목록을 불러오려면 JavaScript를 켜 주세요.</p>
+        </noscript>
+
+        <section class="group-list-section" aria-label="단체 일기장 목록">
+          <p id="group-list-loading" class="group-message" role="status" aria-live="polite">목록을 불러오는 중입니다.</p>
+          <p id="group-list-empty" class="group-empty" hidden>
+            아직 참여 중인 단체 일기장이 없습니다. <a href="group-create.html">새 일기장 만들기</a>
+          </p>
+          <ul id="group-list-items" class="group-list-items" hidden></ul>
+          <p id="group-list-error" class="group-message" role="alert" hidden></p>
         </section>
 
-        <p><a href="../index.html">홈으로 돌아가기</a></p>
+        <p class="group-back-link"><a href="../index.html">홈으로 돌아가기</a></p>
       </section>
     </main>
   </body>
