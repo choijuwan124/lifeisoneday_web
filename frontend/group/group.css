@@ -165,16 +165,16 @@
   overflow-wrap: anywhere;
 }
 
-.group-page .group-members-unavailable {
+.group-page .group-members {
   padding-top: 20px;
   border-top: 1px solid #eee8dc;
 }
 
-.group-page .group-members-unavailable h3 {
+.group-page .group-members h3 {
   margin: 0 0 8px;
 }
 
-.group-page .group-members-unavailable p {
+.group-page .group-members p {
   color: #5d5a54;
   line-height: 1.6;
 }
