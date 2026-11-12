@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>단체 일기장 만들기 | Life Is One Day</title>
+    <link rel="stylesheet" href="../css/style.css" />
+    <link rel="stylesheet" href="group.css" />
+    <script src="../js/api.js" defer></script>
+    <script src="group.js" defer></script>
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="logo" href="../index.html">Life Is One Day</a>
+    </header>
+
+    <main>
+      <section class="group-page" aria-labelledby="group-create-title">
+        <p class="eyebrow">SHARED DIARY</p>
+        <h1 id="group-create-title">단체 일기장 만들기</h1>
+        <p class="group-description">이름과 설명을 정해 친구들과 함께 쓸 일기장을 만들어 보세요.</p>
+
+        <noscript>
+          <p class="group-message" role="alert">일기장을 만들려면 브라우저에서 JavaScript를 켜 주세요.</p>
+        </noscript>
+
+        <form id="group-create-form" class="group-form" aria-describedby="group-create-status">
+          <div class="group-field">
+            <label for="diary-name">일기장 이름</label>
+            <input id="diary-name" name="name" type="text" maxlength="100" required />
+            <p class="group-field-help">최대 100자까지 입력할 수 있습니다.</p>
+          </div>
+          <div class="group-field">
+            <label for="diary-description">일기장 설명</label>
+            <textarea id="diary-description" name="description" rows="5" maxlength="500"></textarea>
+            <p class="group-field-help">선택 입력이며 최대 500자까지 입력할 수 있습니다.</p>
+          </div>
+          <button id="group-create-submit" class="button group-button" type="submit">만들기</button>
+        </form>
+
+        <p id="group-create-status" class="group-message" role="status" aria-live="polite" aria-atomic="true"></p>
+        <p class="group-back-link"><a href="group-list.html">목록으로 돌아가기</a></p>
+      </section>
+    </main>
+  </body>
+</html>
