@@ -188,14 +188,9 @@
       document.getElementById("group-detail-created-at").textContent = formatCreatedAt(group.createdAt);
 
       const memberLink = document.getElementById("group-members-link");
-      const memberContext = document.getElementById("group-members-context");
       const memberUrl = new URL(memberLink.dataset.route, window.location.href);
       memberUrl.searchParams.set("groupId", String(groupId));
       memberLink.href = memberUrl.href;
-      memberContext.textContent = String(groupId);
-      memberLink.addEventListener("click", (event) => {
-        if (memberLink.getAttribute("aria-disabled") === "true") event.preventDefault();
-      });
 
       loading.hidden = true;
       detail.hidden = false;
