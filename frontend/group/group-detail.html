@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>단체 일기장 상세 | Life Is One Day</title>
+    <link rel="stylesheet" href="../css/style.css" />
+    <link rel="stylesheet" href="group.css" />
+    <script src="../js/api.js" defer></script>
+    <script src="group.js" defer></script>
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="logo" href="../index.html">Life Is One Day</a>
+    </header>
+
+    <main>
+      <section class="group-page" aria-labelledby="group-detail-title">
+        <p class="eyebrow">SHARED DIARY</p>
+        <h1 id="group-detail-title">단체 일기장 상세</h1>
+        <p id="group-detail-loading" class="group-message" role="status" aria-live="polite">
+          일기장 정보를 불러오는 중입니다.
+        </p>
+        <p id="group-detail-error" class="group-message" role="alert" hidden></p>
+
+        <article id="group-detail-content" class="group-detail-card" aria-labelledby="group-detail-name" hidden>
+          <h2 id="group-detail-name"></h2>
+          <p id="group-detail-description" class="group-detail-description"></p>
+          <dl class="group-metadata">
+            <div>
+              <dt>소유자 번호</dt>
+              <dd id="group-detail-owner"></dd>
+            </div>
+            <div>
+              <dt>만든 날짜</dt>
+              <dd id="group-detail-created-at"></dd>
+            </div>
+          </dl>
+
+          <section class="group-members-unavailable" aria-labelledby="group-members-title">
+            <h3 id="group-members-title">멤버 관리 및 친구 초대</h3>
+            <p>멤버 관리 화면이 아직 저장소에 없어 연결할 수 없습니다.</p>
+            <a id="group-members-link" class="button group-button is-disabled" href="#" aria-disabled="true"
+               data-route="../member/member-manage.html">멤버 관리 화면 준비 중</a>
+            <span id="group-members-context" hidden></span>
+          </section>
+        </article>
+
+        <p class="group-back-link"><a href="group-list.html">목록으로 돌아가기</a></p>
+      </section>
+    </main>
+  </body>
+</html>
