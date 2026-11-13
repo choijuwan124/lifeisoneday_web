@@ -1,3 +1,42 @@
 <!doctype html>
-<html lang="ko"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>일기 수정 | Life Is One Day</title><link rel="stylesheet" href="../css/style.css"><link rel="stylesheet" href="diary.css"><script src="../js/api.js" defer></script><script src="diary.js" defer></script></head>
-<body><header class="site-header"><a class="logo" href="../index.html">Life Is One Day</a></header><main class="diary-page"><p class="eyebrow">SHARED DIARY</p><h1>일기 수정</h1><p id="diary-loading" class="diary-message" role="status">기존 일기를 불러오는 중입니다.</p><p id="diary-error" class="diary-message" role="alert" hidden></p><p id="diary-no-permission" class="diary-message" role="status" hidden>작성자만 일기를 수정할 수 있습니다.</p><form id="diary-edit-form" class="diary-form" hidden><label for="diary-title">제목</label><input id="diary-title" name="title" maxlength="200" required><label for="diary-content">내용</label><textarea id="diary-content" name="content" maxlength="10000" rows="12" required></textarea><div class="diary-actions"><button class="button" id="diary-submit" type="submit">수정 저장</button><a class="button diary-secondary" id="diary-cancel" href="diary-detail.html">취소</a></div></form></main></body></html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>일기 수정 | Life Is One Day</title>
+<link rel="stylesheet" href="../css/style.css">
+<link rel="stylesheet" href="diary.css">
+<script src="../js/api.js" defer>
+</script>
+    <script src="../js/app.js" defer>
+</script>
+    <script src="../auth/logout.js" defer>
+</script>
+<script src="diary.js" defer>
+</script>
+</head>
+<body>
+<header class="site-header">
+<a class="logo" href="../index.html">Life Is One Day</a>
+</header>
+<main class="diary-page">
+<p class="eyebrow">SHARED DIARY</p>
+<h1>일기 수정</h1>
+<p id="diary-loading" class="diary-message" role="status">기존 일기를 불러오는 중입니다.</p>
+<p id="diary-error" class="diary-message" role="alert" hidden>
+</p>
+<p id="diary-no-permission" class="diary-message" role="status" hidden>작성자만 일기를 수정할 수 있습니다.</p>
+<form id="diary-edit-form" class="diary-form" hidden>
+<label for="diary-title">제목</label>
+<input id="diary-title" name="title" maxlength="200" required>
+<label for="diary-content">내용</label>
+<textarea id="diary-content" name="content" maxlength="10000" rows="12" required>
+</textarea>
+<div class="diary-actions">
+<button class="button" id="diary-submit" type="submit">수정 저장</button>
+<a class="button diary-secondary" id="diary-cancel" href="diary-detail.html">취소</a>
+</div>
+</form>
+</main>
+</body>
+</html>
