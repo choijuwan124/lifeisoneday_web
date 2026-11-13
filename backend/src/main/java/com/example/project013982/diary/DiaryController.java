@@ -71,7 +71,7 @@ public class DiaryController {
             service.delete(userId(request), parse(groupId), parse(diaryId));
             return ResponseEntity.ok(ApiResponse.success("일기를 삭제했습니다.", null));
         } catch (DiaryService.LoginRequiredException e) { return failure(HttpStatus.UNAUTHORIZED, e.getMessage()); }
-n          catch (DiaryService.DiaryForbiddenException e) { return failure(HttpStatus.FORBIDDEN, e.getMessage()); }
+          catch (DiaryService.DiaryForbiddenException e) { return failure(HttpStatus.FORBIDDEN, e.getMessage()); }
           catch (DiaryService.DiaryNotFoundException e) { return failure(HttpStatus.NOT_FOUND, e.getMessage()); }
     }
     @ExceptionHandler(HttpMessageNotReadableException.class)
@@ -92,4 +92,5 @@ n          catch (DiaryService.DiaryForbiddenException e) { return failure(HttpS
         return ResponseEntity.status(status).body(ApiResponse.failure(message));
     }
 }
+
 
