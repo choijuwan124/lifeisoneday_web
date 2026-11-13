@@ -73,3 +73,4 @@ public class DiaryRepository {
         return jdbc.query("SELECT id, group_id, author_id, title, content, created_at, updated_at FROM diaries "
                 + "WHERE id = ? AND group_id = ?", DIARY_ROW_MAPPER, diaryId, groupId).stream().findFirst();
     }
+}
