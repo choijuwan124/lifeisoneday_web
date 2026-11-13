@@ -183,8 +183,12 @@
         typeof group.description === "string" && group.description.length > 0
           ? group.description
           : "등록된 설명이 없습니다.";
-      document.getElementById("group-detail-owner").textContent =
-        group.ownerId == null ? "정보 없음" : String(group.ownerId);
+      const ownerLabel = document.getElementById("group-detail-owner");
+      ownerLabel.textContent = "정보를 불러오는 중…";
+      apiGet(`/api/groups/${groupId}/members`).then(members => {
+        const owner = members.find(member => member.userId === group.ownerId);
+        ownerLabel.textContent = owner?.nickname || "정보 없음";
+      }).catch(() => { ownerLabel.textContent = "멤버 관리에서 확인"; });
       document.getElementById("group-detail-created-at").textContent = formatCreatedAt(group.createdAt);
 
       const memberLink = document.getElementById("group-members-link");
@@ -202,6 +206,28 @@
 
       loading.hidden = true;
       detail.hidden = false;
+      const user = await (window.sessionReady || apiGet("/api/auth/me"));
+      const deleteActions = document.getElementById("group-delete-actions");
+      if (deleteActions && user?.id === group.ownerId) {
+        deleteActions.hidden = false;
+        const button = document.getElementById("group-delete-button");
+        const message = document.getElementById("group-delete-message");
+        let deleting = false;
+        button.addEventListener("click", async () => {
+          if (deleting || !window.confirm(`“${group.name}” 일기장을 삭제할까요?\n모든 멤버의 일기도 영구 삭제됩니다.`)) return;
+          deleting = true;
+          button.disabled = true;
+          setMessage(message, "");
+          try {
+            unwrap(await window.api.delete(`/api/groups/${groupId}`));
+            window.location.assign("group-list.html");
+          } catch (error) {
+            setMessage(message, error.message || "일기장을 삭제하지 못했습니다.", "error");
+            deleting = false;
+            button.disabled = false;
+          }
+        });
+      }
     } catch (requestError) {
       loading.hidden = true;
       setMessage(error, requestError.message || "일기장 정보를 불러오지 못했습니다.", "error");

@@ -23,7 +23,7 @@
       if (result?.success !== true) {
         throw new Error("로그아웃 결과를 확인하지 못했습니다. 다시 시도해 주세요.");
       }
-      window.location.href = "auth/login.html";
+      window.location.href = logoutButton.dataset.loginUrl || "auth/login.html";
     } catch (error) {
       const text = error instanceof TypeError
         ? "서버에 연결할 수 없어 로그아웃하지 못했습니다. 연결을 확인하고 다시 시도해 주세요."

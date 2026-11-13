@@ -7,6 +7,8 @@
     <link rel="stylesheet" href="../css/style.css" />
     <link rel="stylesheet" href="group.css" />
     <script src="../js/api.js" defer></script>
+    <script src="../js/app.js" defer></script>
+    <script src="../auth/logout.js" defer></script>
     <script src="group.js" defer></script>
   </head>
   <body>
@@ -28,7 +30,7 @@
           <p id="group-detail-description" class="group-detail-description"></p>
           <dl class="group-metadata">
             <div>
-              <dt>소유자 번호</dt>
+              <dt>방장</dt>
               <dd id="group-detail-owner"></dd>
             </div>
             <div>
@@ -48,7 +50,14 @@
             <h3 id="group-members-title">멤버 관리 및 친구 초대</h3>
             <p>참여 중인 친구를 확인하거나 새 친구를 초대할 수 있습니다.</p>
             <a id="group-members-link" class="button group-button"
-               href="../member/member-list.html" data-route="../member/member-list.html">멤버 관리 및 친구 초대</a>
+               href="../member/member-manage.html" data-route="../member/member-manage.html">멤버 관리 및 친구 초대</a>
+          </section>
+
+          <section id="group-delete-actions" class="danger-zone" hidden>
+            <h3>일기장 삭제</h3>
+            <p>방장만 삭제할 수 있습니다. 삭제하면 모든 멤버의 일기와 참여 정보가 함께 사라지며 복구할 수 없습니다.</p>
+            <button id="group-delete-button" class="button group-button button-danger" type="button">일기장 삭제</button>
+            <p id="group-delete-message" class="group-message" role="alert" hidden></p>
           </section>
         </article>
 

@@ -80,6 +80,24 @@ public class GroupRepository {
         return groups.stream().findFirst();
     }
 
+    /** Called inside the deletion transaction; prevents concurrent writes to this group. */
+    public Optional<DiaryGroup> findByIdAndMemberIdForUpdate(Long groupId, Long userId) {
+        return jdbcTemplate.query(
+                "SELECT " + GROUP_COLUMNS + " FROM diary_groups g "
+                        + "INNER JOIN diary_group_members gm ON gm.group_id = g.id "
+                        + "WHERE g.id = ? AND gm.user_id = ? FOR UPDATE",
+                GROUP_ROW_MAPPER, groupId, userId).stream().findFirst();
+    }
+
+    public void deleteDiaries(Long groupId) {
+        jdbcTemplate.update("DELETE FROM diaries WHERE group_id = ?", groupId);
+    }
+
+    /** Member rows are removed by the group foreign key's ON DELETE CASCADE. */
+    public int deleteOwnedGroup(Long groupId, Long ownerId) {
+        return jdbcTemplate.update("DELETE FROM diary_groups WHERE id = ? AND owner_id = ?", groupId, ownerId);
+    }
+
     private Optional<DiaryGroup> findById(Long groupId) {
         List<DiaryGroup> groups = jdbcTemplate.query(
                 "SELECT id, name, description, owner_id, created_at FROM diary_groups WHERE id = ?",

@@ -48,6 +48,26 @@ public class GroupService {
                 .orElseThrow(GroupNotAccessibleException::new);
     }
 
+    @Transactional
+    public void delete(Long userId, Long groupId) {
+        requireLoggedIn(userId);
+        if (groupId == null || groupId <= 0) {
+            throw new IllegalArgumentException("올바른 단체 일기장 번호가 아닙니다.");
+        }
+        DiaryGroup group = groupRepository.findByIdAndMemberIdForUpdate(groupId, userId)
+                .orElseThrow(GroupNotAccessibleException::new);
+        if (!group.ownerId().equals(userId)) throw new GroupOwnerRequiredException();
+        // Both deletes roll back together if either fails. User accounts are retained.
+        groupRepository.deleteDiaries(groupId);
+        if (groupRepository.deleteOwnedGroup(groupId, userId) != 1) {
+            throw new GroupNotAccessibleException();
+        }
+    }
+
+    public static final class GroupOwnerRequiredException extends RuntimeException {
+        public GroupOwnerRequiredException() { super("방장만 단체 일기장을 삭제할 수 있습니다."); }
+    }
+
     private static String normalizeName(String value) {
         if (value == null || value.isBlank()) {
             throw new IllegalArgumentException("일기장 이름을 입력해 주세요.");

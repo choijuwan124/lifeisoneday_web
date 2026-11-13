@@ -32,7 +32,11 @@ public class DiaryService {
         requireLoggedIn(userId);
         requireValidGroup(groupId);
         requireMember(groupId, userId);
-        return diaryRepository.findAllByGroupId(groupId);
+        return diaryRepository.findAllByGroupId(groupId).stream()
+                .map(diary -> new DiaryResponse(diary.id(), diary.groupId(), diary.authorId(),
+                        diary.authorNickname(), diary.title(), diary.content(), diary.createdAt(), diary.updatedAt(),
+                        diary.authorId().equals(userId), diary.authorId().equals(userId)))
+                .toList();
     }
 
     public DiaryResponse get(Long userId, Long groupId, Long diaryId) {

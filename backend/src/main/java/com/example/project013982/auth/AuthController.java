@@ -5,10 +5,12 @@ import com.example.project013982.user.User;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.CacheControl;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -23,6 +25,19 @@ public class AuthController {
 
     public AuthController(AuthService authService) {
         this.authService = authService;
+    }
+
+    @GetMapping(value = "/me", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> me(HttpServletRequest request) {
+        HttpSession session = request.getSession(false);
+        Object id = session == null ? null : session.getAttribute("LOGIN_USER_ID");
+        Object nickname = session == null ? null : session.getAttribute("LOGIN_USER_NICKNAME");
+        if (!(id instanceof Number number) || number.longValue() <= 0 || !(nickname instanceof String)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).cacheControl(CacheControl.noStore())
+                    .body(ApiResponse.failure("로그인이 필요합니다."));
+        }
+        return ResponseEntity.ok().cacheControl(CacheControl.noStore())
+                .body(ApiResponse.success(Map.of("id", number.longValue(), "nickname", nickname)));
     }
 
     @PostMapping(value = "/signup", consumes = MediaType.APPLICATION_JSON_VALUE,

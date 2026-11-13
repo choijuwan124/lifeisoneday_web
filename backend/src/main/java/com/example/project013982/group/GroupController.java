@@ -7,6 +7,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -57,6 +58,20 @@ public class GroupController {
             return failure(HttpStatus.UNAUTHORIZED, exception.getMessage());
         } catch (GroupService.GroupNotAccessibleException exception) {
             return failure(HttpStatus.NOT_FOUND, exception.getMessage());
+        }
+    }
+
+    @DeleteMapping(value = "/{groupId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<ApiResponse<Void>> delete(@PathVariable String groupId, HttpSession session) {
+        try {
+            groupService.delete(loginUserId(session), parseGroupId(groupId));
+            return ResponseEntity.ok(ApiResponse.success("단체 일기장과 포함된 일기를 삭제했습니다.", null));
+        } catch (GroupService.LoginRequiredException exception) {
+            return failure(HttpStatus.UNAUTHORIZED, exception.getMessage());
+        } catch (GroupService.GroupNotAccessibleException exception) {
+            return failure(HttpStatus.NOT_FOUND, exception.getMessage());
+        } catch (GroupService.GroupOwnerRequiredException exception) {
+            return failure(HttpStatus.FORBIDDEN, exception.getMessage());
         }
     }
 

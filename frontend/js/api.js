@@ -5,6 +5,7 @@ const API_BASE_URL = `http://${API_HOST}:8080`;
 async function request(path, options = {}) {
   const response = await fetch(`${API_BASE_URL}${path}`, {
     credentials: "include",
+    cache: "no-store",
     ...options,
     headers: {
       Accept: "application/json",
@@ -15,8 +16,13 @@ async function request(path, options = {}) {
   const contentType = response.headers.get("content-type") ?? "";
   const body = contentType.includes("application/json") ? await response.json() : null;
 
-  if (!response.ok) {
-    throw new Error(body?.message ?? "요청 처리 중 오류가 발생했습니다.");
+  if (!response.ok || body?.success === false) {
+    const error = new Error(body?.message ?? "요청 처리 중 오류가 발생했습니다.");
+    error.status = response.status;
+    if (response.status === 401 && typeof window.dispatchEvent === "function") {
+      window.dispatchEvent(new CustomEvent("auth:required"));
+    }
+    throw error;
   }
 
   return body?.data ?? body;

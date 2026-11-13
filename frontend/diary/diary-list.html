@@ -1,3 +1,37 @@
 <!doctype html>
-<html lang="ko"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>일기 목록 | Life Is One Day</title><link rel="stylesheet" href="../css/style.css"><link rel="stylesheet" href="diary.css"><script src="../js/api.js" defer></script><script src="diary.js" defer></script></head>
-<body><header class="site-header"><a class="logo" href="../index.html">Life Is One Day</a></header><main class="diary-page"><p class="eyebrow">SHARED DIARY</p><h1>우리의 일기</h1><p id="diary-loading" class="diary-message" role="status">일기 목록을 불러오는 중입니다.</p><p id="diary-error" class="diary-message" role="alert" hidden></p><p id="diary-empty" class="diary-message" hidden>아직 작성된 일기가 없습니다.</p><ul id="diary-list" class="diary-list" hidden></ul><div class="diary-actions"><a id="diary-create-link" class="button" href="diary-create.html">일기 쓰기</a><a id="diary-group-link" class="button diary-secondary" href="../group/group-list.html">그룹 상세로</a></div></main></body></html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>일기 목록 | Life Is One Day</title>
+<link rel="stylesheet" href="../css/style.css">
+<link rel="stylesheet" href="diary.css">
+<script src="../js/api.js" defer>
+</script>
+    <script src="../js/app.js" defer>
+</script>
+    <script src="../auth/logout.js" defer>
+</script>
+<script src="diary.js" defer>
+</script>
+</head>
+<body>
+<header class="site-header">
+<a class="logo" href="../index.html">Life Is One Day</a>
+</header>
+<main class="diary-page">
+<p class="eyebrow">SHARED DIARY</p>
+<h1>우리의 일기</h1>
+<p id="diary-loading" class="diary-message" role="status">일기 목록을 불러오는 중입니다.</p>
+<p id="diary-error" class="diary-message" role="alert" hidden>
+</p>
+<p id="diary-empty" class="diary-message" hidden>아직 작성된 일기가 없습니다.</p>
+<ul id="diary-list" class="diary-list" hidden>
+</ul>
+<div class="diary-actions">
+<a id="diary-create-link" class="button" href="diary-create.html">일기 쓰기</a>
+<a id="diary-group-link" class="button diary-secondary" href="../group/group-list.html">그룹 상세로</a>
+</div>
+</main>
+</body>
+</html>
