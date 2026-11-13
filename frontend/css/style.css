@@ -34,7 +34,7 @@ nav a[aria-current="page"] { text-decoration: underline; text-underline-offset: 
 nav button { border: 1px solid #d8d2c7; border-radius: 8px; background: white; padding: 7px 12px; color: #304b38; }
 .nav-user { max-width: 180px; overflow-wrap: anywhere; color: #5d5a54; font-size: .85rem; }
 .site-message { max-width: 760px; margin: 20px auto; padding: 14px 20px; background: #fff1ed; color: #7f2c24; border-radius: 8px; }
-.button-danger { background: #8d3d35; }
+.button.button-danger { background: #8d3d35; }
 .danger-zone { margin-top: 32px; padding-top: 24px; border-top: 1px solid #d7a39b; }
 .danger-zone p { color: #714941; }
 
@@ -46,6 +46,8 @@ nav button { border: 1px solid #d8d2c7; border-radius: 8px; background: white; p
 
 .eyebrow { color: #907c5e; font-size: .75rem; letter-spacing: .12em; }
 h1 { font-size: clamp(2.3rem, 7vw, 4.5rem); margin: 12px 0; }
+h1, h2 { word-break: keep-all; overflow-wrap: anywhere; }
+.hero h1 { text-wrap: balance; }
 .hero > p:not(.eyebrow) { line-height: 1.7; color: #5d5a54; }
 
 .button {
