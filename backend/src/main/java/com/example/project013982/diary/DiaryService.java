@@ -104,4 +104,3 @@ public class DiaryService {
     public static class DiaryNotFoundException extends RuntimeException { public DiaryNotFoundException() { super("일기를 찾을 수 없거나 접근 권한이 없습니다."); } }
     public static class DiaryForbiddenException extends RuntimeException { public DiaryForbiddenException() { super("작성자만 일기를 수정하거나 삭제할 수 있습니다."); } }
 }
-
