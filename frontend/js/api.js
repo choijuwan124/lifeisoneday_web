@@ -1,4 +1,6 @@
-const API_BASE_URL = "http://localhost:8080";
+// Keep the loopback hostname consistent so session cookies work with Live Server too.
+const API_HOST = window.location.hostname === "127.0.0.1" ? "127.0.0.1" : "localhost";
+const API_BASE_URL = `http://${API_HOST}:8080`;
 
 async function request(path, options = {}) {
   const response = await fetch(`${API_BASE_URL}${path}`, {
