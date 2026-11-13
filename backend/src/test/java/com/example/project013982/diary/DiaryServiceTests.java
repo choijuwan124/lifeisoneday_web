@@ -69,6 +69,16 @@ class DiaryServiceTests {
         assertEquals("남는 기록", service.get(2L, 10L, created.id()).title());
     }
 
+    @Test void listPermissionsMatchTheCurrentAuthorWithoutExtraLookups() {
+        DiaryResponse mine = service.create(1L, 10L, new CreateDiaryRequest("내 일기", "내용"));
+        DiaryResponse theirs = service.create(2L, 10L, new CreateDiaryRequest("친구 일기", "내용"));
+        var list = service.list(1L, 10L);
+        assertTrue(list.stream().filter(d -> d.id().equals(mine.id())).findFirst().orElseThrow().canEdit());
+        assertTrue(list.stream().filter(d -> d.id().equals(mine.id())).findFirst().orElseThrow().canDelete());
+        assertFalse(list.stream().filter(d -> d.id().equals(theirs.id())).findFirst().orElseThrow().canEdit());
+        assertFalse(list.stream().filter(d -> d.id().equals(theirs.id())).findFirst().orElseThrow().canDelete());
+    }
+
     private static final class MemoryMembers extends GroupMemberRepository {
         private final List<String> memberIds = new ArrayList<>();
         private MemoryMembers() { super(null); }
