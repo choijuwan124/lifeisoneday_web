@@ -92,5 +92,3 @@ public class DiaryController {
         return ResponseEntity.status(status).body(ApiResponse.failure(message));
     }
 }
-
-
