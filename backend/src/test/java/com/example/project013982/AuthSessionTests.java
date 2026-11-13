@@ -19,6 +19,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
 /** Real authentication logic with an in-memory repository; MySQL is tested separately. */
 class AuthSessionTests {
@@ -90,6 +91,32 @@ class AuthSessionTests {
                 .andReturn();
         assertEquals(400, result.getResponse().getStatus());
         assertNull(result.getRequest().getSession(false));
+    }
+
+    @Test
+    void anonymousSessionCheckDoesNotCreateASession() throws Exception {
+        var result = mvc.perform(get("/api/auth/me")).andReturn();
+        assertEquals(401, result.getResponse().getStatus());
+        assertNull(result.getRequest().getSession(false));
+        assertEquals("no-store", result.getResponse().getHeader("Cache-Control"));
+    }
+
+    @Test
+    void sessionCheckReturnsOnlyPublicIdentityAndStopsAfterLogout() throws Exception {
+        signup();
+        var login = mvc.perform(post("/api/auth/login").contentType("application/json")
+                .content("{\"username\":\"review\",\"password\":\"review-password\"}")).andReturn();
+        var session = (MockHttpSession) login.getRequest().getSession(false);
+        var response = mvc.perform(get("/api/auth/me").session(session)).andReturn().getResponse();
+        assertEquals(200, response.getStatus());
+        String body = response.getContentAsString(StandardCharsets.UTF_8);
+        assertTrue(body.contains("\"id\":1"));
+        assertTrue(body.contains("\"nickname\":\"reviewer\""));
+        assertFalse(body.contains("password"));
+        assertFalse(body.contains("username"));
+        assertEquals("no-store", response.getHeader("Cache-Control"));
+        mvc.perform(post("/api/auth/logout").session(session));
+        assertEquals(401, mvc.perform(get("/api/auth/me")).andReturn().getResponse().getStatus());
     }
 
     private static class MemoryUsers extends UserRepository {
