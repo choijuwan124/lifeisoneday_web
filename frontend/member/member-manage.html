@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>멤버 관리 | Life Is One Day</title>
+    <link rel="stylesheet" href="../css/style.css" />
+    <link rel="stylesheet" href="member.css" />
+    <script src="../js/api.js" defer></script>
+    <script src="member.js" defer></script>
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="logo" href="../index.html">Life Is One Day</a>
+      <nav aria-label="주요 메뉴">
+        <a href="../group/group-list.html">일기장 목록</a>
+      </nav>
+    </header>
+
+    <main>
+      <section class="member-manage" aria-labelledby="member-manage-title">
+        <p class="eyebrow">SHARED DIARY</p>
+        <h1 id="member-manage-title">멤버 관리</h1>
+        <p id="member-group-name" class="member-group-name" hidden></p>
+
+        <noscript>
+          <p class="member-message" data-state="error">멤버 관리를 사용하려면 JavaScript를 켜 주세요.</p>
+        </noscript>
+
+        <p id="member-page-message" class="member-message" role="alert" hidden></p>
+
+        <section class="member-panel" aria-labelledby="member-list-heading">
+          <div class="member-panel-header">
+            <h2 id="member-list-heading">현재 참여 멤버</h2>
+            <span id="member-count" class="member-count" hidden></span>
+          </div>
+          <p id="member-list-loading" class="member-message" role="status" aria-live="polite">
+            멤버 목록을 불러오는 중입니다.
+          </p>
+          <p id="member-list-error" class="member-message" role="alert" hidden></p>
+          <button id="member-list-retry" class="button member-button member-button-secondary" type="button" hidden>
+            다시 불러오기
+          </button>
+          <ul id="member-list" class="member-list" hidden></ul>
+        </section>
+
+        <section class="member-panel" aria-labelledby="member-invite-heading">
+          <h2 id="member-invite-heading">친구 초대</h2>
+          <p class="member-help">가입한 친구의 아이디를 입력하면 바로 이 일기장의 멤버로 추가됩니다.</p>
+          <form id="member-invite-form" class="member-invite-form" novalidate>
+            <label for="member-invite-username">친구 아이디</label>
+            <div class="member-invite-row">
+              <input id="member-invite-username" name="username" type="text" autocomplete="off"
+                     maxlength="50" placeholder="예: friend01" required />
+              <button id="member-invite-submit" class="button member-button" type="submit">초대하기</button>
+            </div>
+          </form>
+          <p id="member-invite-status" class="member-message" role="status" aria-live="polite" hidden></p>
+        </section>
+
+        <section class="member-panel member-danger" aria-labelledby="member-leave-heading">
+          <h2 id="member-leave-heading">단체 일기장 나가기</h2>
+          <p class="member-help">
+            나가면 이 일기장을 더 이상 볼 수 없습니다. 다른 멤버와 작성된 일기는 그대로 남습니다.
+            방장은 나갈 수 없습니다.
+          </p>
+          <button id="member-leave-button" class="button member-button member-button-danger" type="button">
+            단체 일기장에서 나가기
+          </button>
+          <p id="member-leave-status" class="member-message" role="status" aria-live="polite" hidden></p>
+        </section>
+
+        <nav class="member-links" aria-label="이동">
+          <a id="member-detail-link" href="../group/group-detail.html">← 일기장 상세로 돌아가기</a>
+          <a href="../group/group-list.html">단체 일기장 목록</a>
+        </nav>
+      </section>
+    </main>
+  </body>
+</html>
