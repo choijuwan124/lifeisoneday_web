@@ -153,9 +153,11 @@
         } catch (e) { showError(e.message || "일기를 수정하지 못했습니다."); pending = false; submit.disabled = false; form.removeAttribute("aria-busy"); }
       });
     } catch (e) { loading.hidden = true; showError(e.message || "일기를 불러오지 못했습니다."); }
-  }  if (byId("diary-list")) loadList();
+  }
+  if (byId("diary-list")) loadList();
   if (byId("diary-create-form")) initCreate();
   if (byId("diary-detail")) loadDetail();
   if (byId("diary-edit-form")) initEdit();
 })();
+
 
