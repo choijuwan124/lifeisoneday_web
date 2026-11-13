@@ -45,6 +45,33 @@ public class DiaryService {
                 .orElseThrow(DiaryNotFoundException::new);
     }
 
+    public DiaryResponse update(Long userId, Long groupId, Long diaryId, UpdateDiaryRequest request) {
+        requireLoggedIn(userId);
+        requireValidGroup(groupId);
+        requireValidDiary(diaryId);
+        requireMember(groupId, userId);
+        if (request == null) throw new IllegalArgumentException("수정할 일기 내용을 입력해 주세요.");
+        Diary existing = diaryRepository.findByIdAndGroupId(diaryId, groupId)
+                .orElseThrow(DiaryNotFoundException::new);
+        if (!existing.authorId().equals(userId)) throw new DiaryForbiddenException();
+        String title = normalize(request.title(), MAX_TITLE_LENGTH, "제목", true);
+        String content = normalize(request.content(), MAX_CONTENT_LENGTH, "내용", false);
+        if (diaryRepository.update(diaryId, groupId, userId, title, content) != 1)
+            throw new DiaryNotFoundException();
+        return diaryRepository.findByIdAndGroupId(diaryId, groupId)
+                .map(diary -> response(diary, true)).orElseThrow(DiaryNotFoundException::new);
+    }
+
+    public void delete(Long userId, Long groupId, Long diaryId) {
+        requireLoggedIn(userId);
+        requireValidGroup(groupId);
+        requireValidDiary(diaryId);
+        requireMember(groupId, userId);
+        Diary existing = diaryRepository.findByIdAndGroupId(diaryId, groupId)
+                .orElseThrow(DiaryNotFoundException::new);
+        if (!existing.authorId().equals(userId)) throw new DiaryForbiddenException();
+        if (diaryRepository.delete(diaryId, groupId, userId) != 1) throw new DiaryNotFoundException();
+    }
     private DiaryResponse response(Diary diary, boolean canEdit) {
         DiaryResponse base = diaryRepository.findResponseByIdAndGroupId(diary.id(), diary.groupId())
                 .orElseThrow(DiaryNotFoundException::new);
@@ -77,3 +104,4 @@ public class DiaryService {
     public static class DiaryNotFoundException extends RuntimeException { public DiaryNotFoundException() { super("일기를 찾을 수 없거나 접근 권한이 없습니다."); } }
     public static class DiaryForbiddenException extends RuntimeException { public DiaryForbiddenException() { super("작성자만 일기를 수정하거나 삭제할 수 있습니다."); } }
 }
+
