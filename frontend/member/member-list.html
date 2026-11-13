@@ -5,40 +5,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>멤버 관리 | Life Is One Day</title>
     <link rel="stylesheet" href="../css/style.css" />
+    <script>
+      // 멤버 관리 기능은 member-manage.html로 통합되었습니다. 기존 링크의 groupId를 그대로 넘깁니다.
+      (function () {
+        var target = new URL("member-manage.html", window.location.href);
+        var groupId = new URLSearchParams(window.location.search).get("groupId");
+        if (groupId) target.searchParams.set("groupId", groupId);
+        window.location.replace(target.href);
+      })();
+    </script>
   </head>
-  <body class="member-page">
-    <header class="site-header">
-      <a class="logo" href="../index.html">Life Is One Day</a>
-      <nav aria-label="주요 메뉴">
-        <a href="../group/group-list.html">일기장 목록</a>
-      </nav>
-    </header>
-
-    <main class="member-main">
-      <section class="member-card" aria-labelledby="member-list-title">
-        <p class="eyebrow">SHARED DIARY</p>
-        <h1 id="member-list-title">멤버 관리</h1>
-
-        <section class="member-section" aria-labelledby="current-members-title">
-          <h2 id="current-members-title">현재 참여 멤버</h2>
-          <ul id="member-list" class="member-list">
-            <li class="member-item">
-              <span class="member-nickname">멤버 닉네임</span>
-            </li>
-          </ul>
-        </section>
-
-        <div class="member-actions">
-          <a class="button" href="member-invite.html">친구 초대하기</a>
-          <button id="leave-group-button" class="button member-leave" type="button">
-            단체 일기장에서 나가기
-          </button>
-        </div>
-
-        <p class="member-back">
-          <a href="../group/group-list.html">← 단체 일기장 목록으로 돌아가기</a>
-        </p>
-      </section>
+  <body>
+    <main class="hero">
+      <p class="eyebrow">SHARED DIARY</p>
+      <p>멤버 관리 화면으로 이동하고 있습니다.</p>
+      <p><a href="member-manage.html">이동하지 않으면 여기를 눌러 주세요.</a></p>
     </main>
   </body>
 </html>
