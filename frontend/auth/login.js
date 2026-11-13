@@ -49,11 +49,13 @@
         username: username.value.trim(),
         password: password.value,
       });
-      if (result?.success !== true) {
-        throw new Error(result?.message || "로그인 결과를 확인하지 못했습니다. 다시 시도해 주세요.");
+      // api.js returns the data object and throws for unsuccessful HTTP responses.
+      if (!result || typeof result.nickname !== "string") {
+        throw new Error("로그인 결과를 확인하지 못했습니다. 다시 시도해 주세요.");
       }
-      showMessage(result.message || "로그인되었습니다. 이동합니다.");
-      window.location.href = "../index.html";
+      password.value = "";
+      showMessage("로그인되었습니다. 일기장 목록으로 이동합니다.");
+      window.location.href = "../group/group-list.html";
     } catch (error) {
       const text = error instanceof TypeError
         ? "서버에 연결할 수 없습니다. 연결 상태를 확인한 뒤 다시 시도해 주세요."
