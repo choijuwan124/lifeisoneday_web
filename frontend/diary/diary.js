@@ -107,11 +107,55 @@
       byId("diary-updated").textContent = formatDate(entry.updatedAt);
       byId("diary-detail-content").textContent = entry.content;
       byId("diary-list-link").href = groupUrl("diary-list.html");
+      if (entry.canEdit === true && entry.canDelete === true) {
+        byId("diary-owner-actions").hidden = false;
+        byId("diary-edit-link").href = diaryUrl("diary-edit.html");
+        byId("diary-delete").addEventListener("click", async () => {
+          if (!window.confirm("이 일기를 삭제할까요?")) return;
+          const button = byId("diary-delete");
+          button.disabled = true; error.hidden = true;
+          try {
+            await api("delete", `/api/groups/${groupId}/diaries/${diaryId}`);
+            window.location.assign(groupUrl("diary-list.html"));
+          } catch (e) { showError(e.message || "일기를 삭제하지 못했습니다."); button.disabled = false; }
+        });
+      }
       loading.hidden = true;
       byId("diary-detail").hidden = false;
     } catch (e) { loading.hidden = true; showError(e.message || "일기를 불러오지 못했습니다."); }
   }
-  if (byId("diary-list")) loadList();
+  async function initEdit() {
+    const loading = byId("diary-loading");
+    const form = byId("diary-edit-form");
+    const title = byId("diary-title");
+    const content = byId("diary-content");
+    const submit = byId("diary-submit");
+    try {
+      requireIds(true);
+      byId("diary-cancel").href = diaryUrl("diary-detail.html");
+      const entry = await api("get", `/api/groups/${groupId}/diaries/${diaryId}`);
+      if (!entry || positiveId(entry.id) !== diaryId || positiveId(entry.groupId) !== groupId) throw new Error("일기 정보를 확인할 수 없습니다.");
+      loading.hidden = true;
+      if (entry.canEdit !== true) { byId("diary-no-permission").hidden = false; return; }
+      title.value = entry.title;
+      content.value = entry.content;
+      form.hidden = false;
+      let pending = false;
+      form.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        if (pending) return;
+        if (!title.value.trim() || !content.value.trim()) { showError("제목과 내용을 입력해 주세요."); return; }
+        if (title.value.trim().length > 200 || content.value.length > 10000) { showError("제목은 200자, 내용은 10,000자 이내로 작성해 주세요."); return; }
+        pending = true; submit.disabled = true; form.setAttribute("aria-busy", "true"); error.hidden = true;
+        try {
+          await api("put", `/api/groups/${groupId}/diaries/${diaryId}`, {title: title.value.trim(), content: content.value});
+          window.location.assign(diaryUrl("diary-detail.html"));
+        } catch (e) { showError(e.message || "일기를 수정하지 못했습니다."); pending = false; submit.disabled = false; form.removeAttribute("aria-busy"); }
+      });
+    } catch (e) { loading.hidden = true; showError(e.message || "일기를 불러오지 못했습니다."); }
+  }  if (byId("diary-list")) loadList();
   if (byId("diary-create-form")) initCreate();
   if (byId("diary-detail")) loadDetail();
+  if (byId("diary-edit-form")) initEdit();
 })();
+
