@@ -8,7 +8,9 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -50,6 +52,28 @@ public class DiaryController {
           catch (DiaryService.DiaryNotFoundException e) { return failure(HttpStatus.NOT_FOUND, e.getMessage()); }
     }
 
+    @PutMapping(value = "/{diaryId}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> update(@PathVariable String groupId, @PathVariable String diaryId,
+                                    @RequestBody(required = false) UpdateDiaryRequest body,
+                                    HttpServletRequest request) {
+        try {
+            DiaryResponse updated = service.update(userId(request), parse(groupId), parse(diaryId), body);
+            return ResponseEntity.ok(ApiResponse.success("일기를 수정했습니다.", updated));
+        } catch (DiaryService.LoginRequiredException e) { return failure(HttpStatus.UNAUTHORIZED, e.getMessage()); }
+          catch (DiaryService.DiaryForbiddenException e) { return failure(HttpStatus.FORBIDDEN, e.getMessage()); }
+          catch (DiaryService.DiaryNotFoundException e) { return failure(HttpStatus.NOT_FOUND, e.getMessage()); }
+    }
+
+    @DeleteMapping(value = "/{diaryId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> delete(@PathVariable String groupId, @PathVariable String diaryId,
+                                    HttpServletRequest request) {
+        try {
+            service.delete(userId(request), parse(groupId), parse(diaryId));
+            return ResponseEntity.ok(ApiResponse.success("일기를 삭제했습니다.", null));
+        } catch (DiaryService.LoginRequiredException e) { return failure(HttpStatus.UNAUTHORIZED, e.getMessage()); }
+n          catch (DiaryService.DiaryForbiddenException e) { return failure(HttpStatus.FORBIDDEN, e.getMessage()); }
+          catch (DiaryService.DiaryNotFoundException e) { return failure(HttpStatus.NOT_FOUND, e.getMessage()); }
+    }
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<ApiResponse<Void>> invalidJson(HttpMessageNotReadableException e) {
         return ResponseEntity.badRequest().body(ApiResponse.failure("일기 요청은 올바른 JSON 형식이어야 합니다."));
@@ -68,3 +92,4 @@ public class DiaryController {
         return ResponseEntity.status(status).body(ApiResponse.failure(message));
     }
 }
+
