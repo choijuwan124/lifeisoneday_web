@@ -159,5 +159,3 @@
   if (byId("diary-detail")) loadDetail();
   if (byId("diary-edit-form")) initEdit();
 })();
-
-
