@@ -192,6 +192,14 @@
       memberUrl.searchParams.set("groupId", String(groupId));
       memberLink.href = memberUrl.href;
 
+      for (const id of ["group-diaries-link", "group-diary-create-link"]) {
+        const link = document.getElementById(id);
+        if (!link) continue;
+        const url = new URL(link.dataset.route, window.location.href);
+        url.searchParams.set("groupId", String(groupId));
+        link.href = url.href;
+      }
+
       loading.hidden = true;
       detail.hidden = false;
     } catch (requestError) {
