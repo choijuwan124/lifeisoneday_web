@@ -58,7 +58,19 @@ public class DiaryRepository {
                 .stream().findFirst();
     }
 
+    /** Updates one diary only when group and author still match; returns the affected row count. */
+    public int update(Long diaryId, Long groupId, Long authorId, String title, String content) {
+        return jdbc.update("UPDATE diaries SET title = ?, content = ?, updated_at = CURRENT_TIMESTAMP "
+                + "WHERE id = ? AND group_id = ? AND author_id = ?", title, content, diaryId, groupId, authorId);
+    }
+
+    /** Deletes only the requested diary owned by the current user in the supplied group. */
+    public int delete(Long diaryId, Long groupId, Long authorId) {
+        return jdbc.update("DELETE FROM diaries WHERE id = ? AND group_id = ? AND author_id = ?",
+                diaryId, groupId, authorId);
+    }
     public Optional<Diary> findByIdAndGroupId(Long diaryId, Long groupId) {
         return jdbc.query("SELECT id, group_id, author_id, title, content, created_at, updated_at FROM diaries "
                 + "WHERE id = ? AND group_id = ?", DIARY_ROW_MAPPER, diaryId, groupId).stream().findFirst();
     }
+
