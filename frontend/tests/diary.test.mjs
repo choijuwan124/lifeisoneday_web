@@ -55,5 +55,3 @@ test("API failures stay on the detail page and display an error", async () => {
   assert.equal(page.elements["diary-error"].textContent, "접근 권한이 없습니다.");
   assert.equal(page.elements["diary-detail"].hidden, true);
 });
-
-
