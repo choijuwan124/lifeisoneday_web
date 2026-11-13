@@ -13,4 +13,3 @@ CREATE TABLE IF NOT EXISTS diaries (
     CONSTRAINT fk_diaries_group FOREIGN KEY (group_id) REFERENCES diary_groups (id) ON DELETE RESTRICT,
     CONSTRAINT fk_diaries_author FOREIGN KEY (author_id) REFERENCES users (id) ON DELETE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
