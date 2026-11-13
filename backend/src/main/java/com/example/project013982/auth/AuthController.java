@@ -2,6 +2,7 @@ package com.example.project013982.auth;
 
 import com.example.project013982.common.ApiResponse;
 import com.example.project013982.user.User;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -33,22 +34,27 @@ public class AuthController {
     @PostMapping(value = "/login", consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<ApiResponse<Map<String, String>>> login(
-            @RequestBody(required = false) LoginRequest request, HttpSession session) {
+            @RequestBody(required = false) LoginRequest request, HttpServletRequest servletRequest) {
         User user = authService.login(request);
+        HttpSession session = servletRequest.getSession();
+        servletRequest.changeSessionId();
         session.setAttribute("LOGIN_USER_ID", user.id());
         session.setAttribute("LOGIN_USER_NICKNAME", user.nickname());
         return ResponseEntity.ok(ApiResponse.success("로그인되었습니다.", Map.of("nickname", user.nickname())));
     }
 
     @PostMapping(value = "/logout", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<ApiResponse<Void>> logout(HttpSession session) {
-        session.invalidate();
+    public ResponseEntity<ApiResponse<Void>> logout(HttpServletRequest request) {
+        HttpSession session = request.getSession(false);
+        if (session != null) {
+            session.invalidate();
+        }
         return ResponseEntity.ok(ApiResponse.success("로그아웃되었습니다.", null));
     }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
-    public ResponseEntity<ApiResponse<Void>> handleInvalidSignupJson(HttpMessageNotReadableException exception) {
+    public ResponseEntity<ApiResponse<Void>> handleInvalidJson(HttpMessageNotReadableException exception) {
         return ResponseEntity.badRequest()
-                .body(ApiResponse.failure("회원가입 요청은 올바른 JSON 형식이어야 합니다."));
+                .body(ApiResponse.failure("요청은 올바른 JSON 형식이어야 합니다."));
     }
 }
