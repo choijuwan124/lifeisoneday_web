@@ -2,16 +2,18 @@
 const API_HOST = window.location.hostname === "127.0.0.1" ? "127.0.0.1" : "localhost";
 const API_BASE_URL = `http://${API_HOST}:8080`;
 
-async function request(path, options = {}) {
+async function request(path, options = {}, responseType = "json") {
   const response = await fetch(`${API_BASE_URL}${path}`, {
     credentials: "include",
     cache: "no-store",
     ...options,
     headers: {
-      Accept: "application/json",
+      Accept: responseType === "blob" ? "image/png, image/jpeg, application/json" : "application/json",
       ...options.headers,
     },
   });
+
+  if (response.ok && responseType === "blob") return response.blob();
 
   const contentType = response.headers.get("content-type") ?? "";
   const body = contentType.includes("application/json") ? await response.json() : null;
@@ -42,4 +44,10 @@ window.api = {
   put: (path, data) => jsonRequest("PUT", path, data),
   patch: (path, data) => jsonRequest("PATCH", path, data),
   delete: (path) => request(path, { method: "DELETE" }),
+  // Let fetch add the multipart boundary. A JSON Content-Type would corrupt this request.
+  upload: (path, formData) => {
+    if (!(formData instanceof FormData)) throw new TypeError("사진은 FormData로 전달해야 합니다.");
+    return request(path, { method: "PUT", body: formData });
+  },
+  getBlob: (path) => request(path, {}, "blob"),
 };
