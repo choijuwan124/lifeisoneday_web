@@ -8,6 +8,9 @@
 - [마지막 주 발표·시연 순서](presentation-guide.md)
 - [현재 개발 계획·완료 상태](../plan)
 - [프로젝트 소개와 팀 담당](../main.md)
+- [좋아요·댓글·사진: 팀원 시작 순서와 공통 설정](social-setup.md)
+- [좋아요·댓글·사진: API·DB·화면 연결 계약](social-feature-contract.md)
+- [주완의 오류 재현·수정 실습 4건](debug/common.md)
 
 초기 역할표·프롬프트의 경로가 현재 코드와 다르면 위 문서와 실제 파일을 기준으로 한다.
 현재 Java 패키지는 `com.example.project013982`, 공통 프런트 파일은 `frontend/js/`와 `frontend/css/`에 있다.
