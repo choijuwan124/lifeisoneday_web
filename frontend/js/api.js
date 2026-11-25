@@ -8,7 +8,7 @@ async function request(path, options = {}, responseType = "json") {
     cache: "no-store",
     ...options,
     headers: {
-      Accept: "application/json",
+      Accept: responseType === "blob" ? "image/png, image/jpeg, application/json" : "application/json",
       ...options.headers,
     },
   });
