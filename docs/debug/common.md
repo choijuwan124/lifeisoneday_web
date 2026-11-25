@@ -27,9 +27,19 @@
 - 재검증: 같은 7개 테스트 모두 통과.
 - 범위: 요청의 credentials 설정 검증이다. 실제 브라우저의 쿠키 정책까지 검증했다고 주장하지 않는다.
 
+## 3. 좋아요 UNIQUE 제약 누락 — 완료
+
+- 정상 기준: `2bfd3f8`, 실제 MySQL 8.4 테스트 7개 통과.
+- 재현 커밋: `986f18e` — `(diary_id, user_id)` UNIQUE 제약 제거.
+- 실행: `MYSQL_BIN=<mysql 경로> MYSQL_TEST_SOCKET=<격리 서버 소켓> python3 scripts/test-social-schema.py`.
+- 실제 결과: 7개 중 1개 실패. 동일 일기·사용자의 두 번째 INSERT가 성공했다.
+- 실패 출력: `invalid SQL operation was accepted: INSERT INTO diary_likes(diary_id,user_id) VALUES (100,1)`.
+- 원인: 애플리케이션 확인만으로는 중복을 DB에서 보장할 수 없다. UNIQUE가 빠지면 중복 행이 허용된다.
+- 수정 커밋: `1f8dc25` — UNIQUE 제약 복구. 같은 7개 검사 모두 통과했고 중복 INSERT가 MySQL 1062로 거부됨.
+- 범위: 매 실행마다 새 격리 DB를 생성·삭제했다. 기존 테이블에 IF NOT EXISTS를 재실행해 제약이 생긴다고 가정하지 않았다.
+
 ## 다음 실습
 
-3. DB UNIQUE 제약 누락 — 진행 예정
 4. 요청 전체 업로드 제한 오류 — 진행 예정
 
 테스트 원본은 `frontend/tests/api-upload.test.mjs`에 있다.
