@@ -47,7 +47,7 @@ window.api = {
   // Let fetch add the multipart boundary. A JSON Content-Type would corrupt this request.
   upload: (path, formData) => {
     if (!(formData instanceof FormData)) throw new TypeError("사진은 FormData로 전달해야 합니다.");
-    return request(path, { method: "PUT", headers: { "Content-Type": "application/json" }, body: formData });
+    return request(path, { method: "PUT", body: formData });
   },
   getBlob: (path) => request(path, {}, "blob"),
 };
