@@ -38,9 +38,23 @@
 - 수정 커밋: `1f8dc25` — UNIQUE 제약 복구. 같은 7개 검사 모두 통과했고 중복 INSERT가 MySQL 1062로 거부됨.
 - 범위: 매 실행마다 새 격리 DB를 생성·삭제했다. 기존 테이블에 IF NOT EXISTS를 재실행해 제약이 생긴다고 가정하지 않았다.
 
-## 다음 실습
+## 4. 요청 전체 크기가 파일 허용 크기보다 작은 설정 — 완료
 
-4. 요청 전체 업로드 제한 오류 — 진행 예정
+- 정상 기준: `52b6852`, 실제 임시 HTTP 서버의 multipart 검사 3개 통과.
+- 재현 커밋: `c3699c4` — 파일 제한은 5MB인데 요청 전체 제한을 1MB로 낮춤.
+- 실행: `./backend/gradlew -p backend test --tests '*UploadLimitsTests' --console=plain`.
+- 실제 결과: 3개 중 `acceptsFiveMiBFileIncludingMultipartEnvelope` 1개 실패.
+- 실제 실패 출력: `java.io.IOException: chunked transfer encoding, state: READING_LENGTH`.
+- 원인: 5MiB 파일 본문이 전체 요청 한도를 넘었다. 이 실행에서는 서버의 거부 이후 클라이언트 연결 오류로 관측됐다. HTTP 413 응답을 정상 수신했다고 기록하지 않는다.
+- 수정 커밋: `4a012e8` — 파일 5MB, 전체 요청 8MB로 복구해 multipart 헤더·경계 공간 확보.
+- 재검증: 같은 3개 검사 모두 통과. 5MiB 정확히 허용, 5MiB+1 byte는 공통 JSON 413, 작은 파일은 200.
+- 범위: 실제 HTTP multipart 파서 검사다. 테스트 전용 컨트롤러는 바이트 수만 확인하며 실제 이미지 해석·권한 검사는 림정의 기능에서 별도 검증해야 한다.
+
+## 결과
+
+서로 다른 4개 사례를 순서대로 재현하고 각각 수정했다. 실패 커밋과 수정 커밋을 분리했고, 재검증 후에만 다음 사례로 진행했다.
+원시 실행 로그는 로컬 `.local/debug/`에 두고, 공개 문서에는 실제 관측 결과와 재현 명령을 기록했다.
+모든 MySQL 실습은 기존 사용자 데이터와 분리된 임시 서버·임시 DB에서 수행했다.
 
 테스트 원본은 `frontend/tests/api-upload.test.mjs`에 있다.
 각 재현·수정 커밋은 GitHub의 commit 화면 또는 `git show <커밋>`으로 비교할 수 있다.
