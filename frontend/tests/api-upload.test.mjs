@@ -10,6 +10,12 @@ function setup({host = 'localhost', status = 200, data = {id: 9}, binary = false
   const context = vm.createContext({window, FormData, TypeError, Error, CustomEvent,
     fetch: async (url, options) => {
       requests.push(new Request(url, options));
+      // A photo endpoint can declare image/png as its response media type.
+      // Simulate content negotiation instead of always accepting JSON-only requests.
+      const accept = requests.at(-1).headers.get('Accept') ?? '*/*';
+      if (binary && !accept.split(',').some(value => ['image/png', 'image/*', '*/*'].includes(value.trim()))) {
+        return Response.json({success: false, message: 'Not Acceptable', data: null}, {status: 406});
+      }
       return binary
         ? new Response(new Uint8Array([137, 80, 78, 71]), {status, headers:{'Content-Type':'image/png'}})
         : Response.json({success: status < 400, message: 'upload result', data}, {status});
