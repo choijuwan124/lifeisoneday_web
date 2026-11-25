@@ -3,3 +3,9 @@ spring.datasource.url=jdbc:mysql://localhost:3306/lifeisoneday?serverTimezone=As
 spring.datasource.username=YOUR_MYSQL_USERNAME
 spring.datasource.password=YOUR_MYSQL_PASSWORD
 spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
+
+# Optional: absolute private photo directory. Never use frontend/ or a public static directory.
+# The default is ../.local/uploads when starting the backend from backend/.
+# Set DIARY_UPLOAD_DIR, or uncomment and adjust this setting.
+# In Windows .properties files use forward slashes, not unescaped backslashes.
+# app.upload.directory=C:/Users/YOUR_NAME/lifeisoneday_web/.local/uploads
