@@ -56,5 +56,11 @@
 원시 실행 로그는 로컬 `.local/debug/`에 두고, 공개 문서에는 실제 관측 결과와 재현 명령을 기록했다.
 모든 MySQL 실습은 기존 사용자 데이터와 분리된 임시 서버·임시 DB에서 수행했다.
 
-테스트 원본은 `frontend/tests/api-upload.test.mjs`에 있다.
+테스트 원본은 다음 세 파일에 있다.
+
+- [multipart·쿠키 검사](../../frontend/tests/api-upload.test.mjs)
+- [실제 MySQL 제약 검사](../../scripts/test-social-schema.py)
+- [실제 HTTP 업로드 제한 검사](../../backend/src/test/java/com/example/project013982/config/UploadLimitsTests.java)
+
+최종 검증: Gradle 전체 빌드 성공, Java 29개·Node 20개·격리 MySQL 7개 검사 통과.
 각 재현·수정 커밋은 GitHub의 commit 화면 또는 `git show <커밋>`으로 비교할 수 있다.
