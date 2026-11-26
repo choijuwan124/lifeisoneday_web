@@ -48,3 +48,27 @@ Gradle 전체 빌드와 Node 검사 24건이 통과했다. 서비스 검사는 �
   `Can't find error-message file 'C:\share\english\errmsg.sys'`와
   `Failed to set datadir to 'C:\data\'`가 출력됐다.
   격리 데이터 경로를 임시 ASCII 드라이브 문자로 매핑한 뒤 127.0.0.1:33317에서 기동했다.
+
+## 실제 MySQL과 HTTP 검사
+
+새 격리 DB에서 `SHOW TABLES`를 확인한 뒤 signup → group → diary → like → comment → photo 스키마를 순서대로 적용했다.
+`SHOW CREATE TABLE diary_likes`에서 `uk_diary_likes_diary_user`와 두 외래키를 확인했다.
+검사 스크립트는 실행할 때마다 새 시험 계정과 일기장을 만들므로 격리 DB에 연결한 앱으로 실행한다.
+
+```powershell
+.\backend\gradlew.bat -p backend bootJar
+$env:LIKES_TEST_PORT = '18082'
+node --test scripts/test-likes-http.mjs
+```
+
+위 포트에서 격리 MySQL에 연결한 최신 JAR를 새로 기동한 뒤 Node 명령을 실행한다.
+실제 HTTP 세션과 MySQL을 사용한다. 화면 실습의 Node 검사는 DOM 대역을 사용한다.
+
+## [실습] 1. 반복 등록의 중복 키 오류
+
+- 재현 `c48244e`, 수정 `f45c261`. 의도적으로 중복 키 처리만 제거하고 MySQL UNIQUE는 유지했다.
+- 위 HTTP 검사에서 같은 세션으로 같은 일기에 PUT을 두 번 보냈다. 둘 다 200이어야 했으나 첫 요청은 200, 두 번째는 500이었다.
+- 실패 출력 `PUT /api/groups/3/diaries/5/likes/me: 서버 오류가 발생했습니다.`, `500 !== 200`.
+- 원인은 MySQL이 두 번째 INSERT를 UNIQUE 위반으로 거부하고 그 오류가 500으로 전달된 것이다.
+  오류 코드 1062와 해당 제약 이름이 일치하는 경우만 재등록 성공으로 처리하도록 복구했다.
+- 동일 HTTP 검사 3건 재통과. 순차 PUT 2회와 삭제 직후 병렬 PUT 8회가 모두 200이었고 최종 GET 개수는 1이었다.
