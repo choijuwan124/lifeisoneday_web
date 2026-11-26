@@ -36,14 +36,10 @@ public class LikeRepository {
 
     public LikeStatus status(long diaryId, long userId) {
         return jdbc.queryForObject("""
-                SELECT (
-                    SELECT COUNT(*) FROM diary_likes group_likes
-                    JOIN diaries entry ON entry.id = group_likes.diary_id
-                    WHERE entry.group_id = (SELECT group_id FROM diaries WHERE id = ?)
-                ) AS like_count, COUNT(CASE WHEN user_id = ? THEN 1 END) AS my_count
+                SELECT COUNT(*) AS like_count, COUNT(CASE WHEN user_id = ? THEN 1 END) AS my_count
                 FROM diary_likes
                 WHERE diary_id = ?
                 """, (row, number) -> new LikeStatus(diaryId, row.getLong("like_count"),
-                row.getLong("my_count") > 0), diaryId, userId, diaryId);
+                row.getLong("my_count") > 0), userId, diaryId);
     }
 }
