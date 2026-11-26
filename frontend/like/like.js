@@ -41,7 +41,9 @@
               || typeof result.likedByMe !== "boolean") {
             throw new Error("좋아요 상태를 확인할 수 없습니다.");
           }
-          status = result;
+          status = status?.likedByMe && !result.likedByMe
+            ? { ...result, likeCount: status.likeCount }
+            : result;
           render();
         } catch (error) {
           if (!destroyed) {
