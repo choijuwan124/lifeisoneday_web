@@ -43,6 +43,7 @@
           }
           status = result;
           render();
+          button.disabled = false;
         } catch (error) {
           if (!destroyed) {
             message.textContent = error?.message || "좋아요 요청에 실패했습니다.";
@@ -50,7 +51,6 @@
         } finally {
           pending = null;
           if (!destroyed) {
-            button.disabled = false;
             widget.setAttribute("aria-busy", "false");
           }
         }
