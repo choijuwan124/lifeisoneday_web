@@ -19,15 +19,7 @@ public class LikeRepository {
     }
 
     public void add(long diaryId, long userId) {
-        try {
-            jdbc.update("INSERT INTO diary_likes (diary_id, user_id) VALUES (?, ?)", diaryId, userId);
-        } catch (DuplicateKeyException error) {
-            if (!(error.getMostSpecificCause() instanceof SQLException sqlError)
-                    || sqlError.getErrorCode() != 1062
-                    || !LIKE_UNIQUE_KEY.matcher(sqlError.getMessage()).find()) {
-                throw error;
-            }
-        }
+        jdbc.update("INSERT INTO diary_likes (diary_id, user_id) VALUES (?, ?)", diaryId, userId);
     }
 
     public void remove(long diaryId, long userId) {
