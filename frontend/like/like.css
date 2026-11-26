@@ -1,0 +1,41 @@
+.like-widget {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.75rem;
+}
+
+.like-widget button {
+  min-block-size: 2.75rem;
+  padding: 0.4rem 1rem;
+  border: 1px solid #9c4961;
+  border-radius: 999px;
+  background: #fff;
+  color: #79223e;
+  font: inherit;
+  cursor: pointer;
+}
+
+.like-widget button[aria-pressed="true"] {
+  background: #79223e;
+  color: #fff;
+}
+
+.like-widget button:focus-visible {
+  outline: 2px solid #79223e;
+  outline-offset: 3px;
+}
+
+.like-widget[aria-busy="true"] button {
+  opacity: 0.65;
+  cursor: wait;
+}
+
+.like-widget .like-widget-message {
+  flex-basis: 100%;
+  color: #9b203c;
+}
+
+.like-widget .like-widget-message:empty {
+  position: absolute;
+}
