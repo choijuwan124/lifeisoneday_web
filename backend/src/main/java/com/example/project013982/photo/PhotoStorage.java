@@ -11,8 +11,9 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.LinkOption;
 import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
+import java.nio.file.StandardOpenOption;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.UUID;
@@ -46,7 +47,7 @@ public class PhotoStorage {
         String storageKey = UUID.randomUUID() + suffix;
         Path destination = resolve(storageKey, true);
         try {
-            Files.write(destination, bytes);
+            Files.write(destination, bytes, StandardOpenOption.CREATE_NEW, StandardOpenOption.WRITE);
         } catch (IOException exception) {
             throw new PhotoStorageException("사진 파일을 저장하지 못했습니다.", exception);
         }
@@ -55,6 +56,7 @@ public class PhotoStorage {
 
     public byte[] read(String storageKey) {
         Path path = resolve(storageKey, false);
+        if (!Files.isRegularFile(path, LinkOption.NOFOLLOW_LINKS)) throw new PhotoMissingFileException();
         try {
             return Files.readAllBytes(path);
         } catch (IOException exception) {
