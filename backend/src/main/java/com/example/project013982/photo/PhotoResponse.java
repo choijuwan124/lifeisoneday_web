@@ -12,9 +12,9 @@ public record PhotoResponse(
         LocalDateTime updatedAt,
         String contentPath) {
 
-    public static PhotoResponse from(Photo photo) {
+    public static PhotoResponse from(Photo photo, Long groupId) {
         return new PhotoResponse(photo.id(), photo.diaryId(), photo.contentType(), photo.sizeBytes(),
                 photo.createdAt(), photo.updatedAt(), "/api/groups/%d/diaries/%d/photo/content"
-                .formatted(photo.groupId(), photo.diaryId()));
+                .formatted(groupId, photo.diaryId()));
     }
 }
