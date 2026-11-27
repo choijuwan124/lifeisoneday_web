@@ -60,17 +60,27 @@ node --test frontend/tests/auth.test.mjs frontend/tests/diary.test.mjs frontend/
 git diff --check
 ```
 
+실제 Chrome 입력 검사: `node --test scripts/test-comments-browser.mjs`.
+Node 22 이상과 Chrome/Chromium이 필요하며, 기본 설치 경로가 아니면 `CHROME_BIN`을 지정한다.
+이 검사는 별도 임시 브라우저 프로필과 API 대역을 사용하고 종료 시 정리한다.
+
 | 검사 | 범위 | 결과 |
 | --- | --- | --- |
-| `frontend/tests/comment.test.mjs` | Node의 DOM·API 대역 | 11건 통과 |
-| 기존 프런트 검사 포함 전체 Node 검사 | Node 대역 | 35건 통과 |
-| `CommentServiceTests` | 저장소 대역 (Mockito) | 15건 통과 — 아래 "검사 환경" 참고 |
-| `CommentControllerTests` | MockMvc + 저장소 대역 | Gradle 실행 대기 |
-| Gradle 전체 빌드 | 기존 로그인·일기·좋아요 검사 포함 | Gradle 실행 대기 |
-| `scripts/test-comments-http.mjs` | 실제 MySQL + 실제 HTTP 세션 | 앱 실행 대기 |
+| `frontend/tests/comment.test.mjs` | Node의 DOM·API 대역 | 13건 통과 |
+| 기존 프런트 검사 포함 전체 Node 검사 | Node 대역 | 37건 통과 |
+| `CommentServiceTests` | 프로젝트 Gradle·Mockito 저장소 대역 | 15건 통과 |
+| `CommentControllerTests` | 프로젝트 Gradle·MockMvc + 저장소 대역 | 10건 통과 |
+| Gradle 전체 빌드 | 기존 로그인·일기·좋아요 검사 포함 | 성공, Java 62건 통과 |
+| `scripts/test-comments-http.mjs` | 격리 MySQL + 실제 HTTP 세션 | 7건 통과 |
+| `scripts/test-likes-http.mjs` | 같은 격리 앱의 좋아요 회귀 검사 | 3건 통과 |
+| `scripts/test-comments-browser.mjs` | 실제 Chrome 입력 + API 대역 | 3건 통과 |
 | 실브라우저 연결 | 민재의 상세 화면 | 미검증 (민재 #22에서 연결) |
 
 ### 검사 환경
+
+아래 네 항목은 용준의 최초 개발 환경 기록이다. 2026-11-27 주완의 검토·보완 환경에서
+프로젝트의 실제 Gradle 전체 빌드와 격리 MySQL·HTTP 검사를 추가 실행해 위 표로 갱신했다.
+최종 검사 총 112건(Java 62 + Node 37 + HTTP 10 + Chrome 3)이 통과했다.
 
 - 작업 환경에서 Maven Central·Gradle 배포 서버 접속이 차단되어 프로젝트 Gradle 빌드를 아직 실행하지 못했다.
 - 그동안 Ubuntu 패키지의 Spring 4.3·Mockito 2 jar로 댓글 Java 파일을 예비 컴파일했다.
@@ -84,7 +94,19 @@ git diff --check
 
 아래 사례는 정상 구현·검사가 통과한 상태에서 **일부러 오류를 주입한 실습**이다. 실제 개발 중 발견한 오류로 발표하지 않는다.
 실습마다 오류 주입 → 검사 실패 확인 → `[실습]` 재현 커밋 → 수정 → 같은 검사 재통과 → 수정 커밋 순서로 진행했다.
-실습 2~4는 Node에서 바로 검증할 수 있어 먼저 진행했고, 서버 검사가 필요한 실습 1은 Gradle 실행이 가능해진 뒤 진행한다.
+용준이 실습 2~4를 먼저 수행했고, 주완이 실제 프로젝트 Gradle 환경에서 실습 1을 보완했다.
+실제 검토 중 발견한 화면 결함은 아래 별도 절에 구분해서 기록한다.
+
+### [실습] 1. 1000자 경계 오류 — 주완 보완 완료
+
+- 정상 기준: 프로젝트 Gradle의 `CommentServiceTests` 15건 통과.
+- 재현 `a0a97e5`, 수정 `ab0f886`. 서버 길이 조건을 의도적으로 `> 1000`에서 `>= 1000`으로 바꿨다.
+- 실행: `./backend/gradlew -p backend test --tests '*CommentServiceTests' --console=plain`.
+  Windows에서는 `.\backend\gradlew.bat -p backend test --tests '*CommentServiceTests' --console=plain`.
+- 실제 실패: 15건 중 경계 검사와 코드 포인트 검사 2건 실패.
+  1000자 ASCII·이모지가 정상 입력인데 `IllegalArgumentException: 댓글은 1000자 이하로 입력해 주세요.`가 발생했다.
+- 수정: 초과(`>`) 조건으로 복구. 같은 15건 모두 통과했고 999·1000자 허용, 1001자 거부를 확인했다.
+- 범위: 서비스 검사이며 의도적 실습이다. 최종 수정 상태는 이후 실제 HTTP 경계 검사에서도 통과했다.
 
 ### [실습] 2. 수정 성공 후 화면 미갱신
 
@@ -117,3 +139,28 @@ git diff --check
 - 수정: 응답이 올바른 Comment인지 확인한 뒤에만 입력을 비우고, 실패 시 `finally`에서 입력창·버튼을 다시 활성화. 재검증 11건 통과.
   재시도한 POST 두 번 모두 본문이 `{"content":"보존될 댓글"}`이었고 두 번째 요청 성공 후 목록에 표시됐다.
 - 범위: Node DOM 대역 검사.
+
+## 주완의 실제 검토 발견 및 수정
+
+아래는 오류를 주입하지 않고 PR 검토에서 발견한 문제다. 위 의도적 실습과 구분한다.
+
+### 이모지 입력이 500개에서 잘리는 문제
+
+- 재현 검사 `efe5cf4`, 수정 `5a7bea5`.
+- 작성·수정 textarea의 `maxlength=1000`은 UTF-16 단위인데 서버와 JS 검증은 코드 포인트를 센다.
+- 실제 Chrome의 입력 기능으로 이모지 1000개를 보내자 값에는 500개만 남았다.
+  1001개 입력도 500개로 잘려 일부 내용만 제출됐다. 브라우저 검사 3건 모두 실패했다.
+- native maxlength를 제거하고 기존 코드 포인트 검증으로 제출을 검사하도록 수정했다.
+- 동일 Chrome 검사 3건 통과: 작성·수정 1000개 모두 전송, 1001개는 입력을 유지하고 오류 안내 후 전송하지 않음.
+- 범위: 실제 브라우저 입력 + API 대역. 민재의 실제 상세 페이지 연결을 검증한 것은 아니다.
+
+### 작성 응답과 목록 갱신이 겹칠 때 중복·순서 오류
+
+- 재현 검사 `0662b63`, 수정 `5a7bea5`.
+- POST 응답이 대기 중일 때 refresh가 이미 저장된 댓글을 반환하면 기존 코드는 같은 ID를 다시 추가했다.
+- 추가 검사에서 기대 `[새 댓글, 나중 댓글]`, 실제 `[새 댓글, 나중 댓글, 새 댓글]`로 실패했다.
+- 새 댓글 응답보다 늦은 댓글의 GET이 먼저 도착하면 `[나중 작성, 먼저 작성]`으로 표시되는 검사도 실패했다.
+- ID 기준으로 기존 항목과 병합하고 `createdAt`, `id` 오름차순으로 정리했다.
+- 추가 2건을 포함한 댓글 Node 검사 13건 모두 통과했다. 실제 DB에 중복 행이 생긴다는 의미는 아니다.
+
+최종 코드는 실습 오류가 모두 수정된 상태다. 원시 실행 로그는 주완 로컬의 Git 제외 경로에 보관했다.
