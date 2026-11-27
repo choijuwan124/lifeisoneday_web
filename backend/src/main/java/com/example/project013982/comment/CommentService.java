@@ -87,7 +87,7 @@ public class CommentService {
         if (!(request.content() instanceof String raw)) throw new IllegalArgumentException("댓글 내용은 문자열이어야 합니다.");
         String content = raw.strip();
         if (content.isEmpty()) throw new IllegalArgumentException("댓글 내용을 입력해 주세요.");
-        if (content.codePointCount(0, content.length()) >= MAX_CONTENT_LENGTH) {
+        if (content.codePointCount(0, content.length()) > MAX_CONTENT_LENGTH) {
             throw new IllegalArgumentException("댓글은 " + MAX_CONTENT_LENGTH + "자 이하로 입력해 주세요.");
         }
         return content;
