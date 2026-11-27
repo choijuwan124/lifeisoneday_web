@@ -225,7 +225,7 @@
         const updated = await window.api.put(`${path}/${encodeURIComponent(id)}`, { content: checked.content });
         if (destroyed) return;
         if (!isComment(updated) || updated.id !== id) throw new Error("수정한 댓글을 확인할 수 없습니다.");
-        comments = comments.map(comment => (comment.id === id ? updated : comment));
+        comments = comments.map(comment => comment); // [실습] 서버 응답을 반영하지 않음
         version += 1;
         editing.delete(id);
       } catch (error) {
