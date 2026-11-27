@@ -46,7 +46,6 @@
     };
     const revoke = (url) => {
       if (!url || !urls.delete(url)) return;
-      view.URL.revokeObjectURL(url);
     };
     const image = (url, alt = "일기 사진") => {
       const img = make("img", "photo-widget-image");
