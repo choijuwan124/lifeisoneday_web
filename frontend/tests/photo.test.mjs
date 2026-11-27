@@ -94,6 +94,20 @@ test("canceling a replacement preserves the server photo without revoking its vi
   assert.deepEqual(env.revoked, ["blob:2", "blob:1"]);
 });
 
+test("replacing a local selection revokes only the no-longer-displayed URL", async () => {
+  const env = setup();
+  const editor = await env.window.PhotoUI.mountEditor({ root: env.root, groupId: 4, diaryId: null });
+  const input = env.find("photo-widget-input");
+  input.files = [new Blob(["first"])]; await input.dispatch("change");
+  assert.equal(env.find("photo-widget-image").src, "blob:1");
+  assert.deepEqual(env.revoked, []);
+  input.files = [new Blob(["second"])]; await input.dispatch("change");
+  assert.equal(env.find("photo-widget-image").src, "blob:2");
+  assert.deepEqual(env.revoked, ["blob:1"]);
+  editor.destroy();
+  assert.deepEqual(env.revoked, ["blob:1", "blob:2"]);
+});
+
 test("existing photo delete is explicit and null-data response succeeds", async () => {
   const env = setup({ metadata: photo });
   const editor = await env.window.PhotoUI.mountEditor({ root: env.root, groupId: 4, diaryId: 7 });
