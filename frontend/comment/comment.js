@@ -248,9 +248,8 @@
       render();
       try {
         // A successful delete has data:null, so api.js returns the whole ApiResponse. It is not a Comment.
-        const deleted = await window.api.delete(`${path}/${encodeURIComponent(id)}`);
+        await window.api.delete(`${path}/${encodeURIComponent(id)}`);
         if (destroyed) return;
-        if (!isComment(deleted)) throw new Error("삭제한 댓글을 확인할 수 없습니다."); // [실습] 응답을 Comment로 가정
         comments = comments.filter(comment => comment.id !== id);
         version += 1;
         editing.delete(id);
