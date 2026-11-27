@@ -96,3 +96,13 @@ git diff --check
 - 원인: 수정 성공 후 편집 상태만 닫고, 목록의 해당 댓글을 응답 객체로 바꾸지 않았다.
 - 수정: 같은 ID의 댓글을 PUT 응답 객체로 교체해 본문·`updatedAt`을 서버 값으로 표시. 재검증 11건 통과.
 - 범위: Node DOM 대역 검사. 실제 서버의 PUT 응답 형태는 컨트롤러·HTTP 검사에서 따로 확인한다.
+
+### [실습] 3. 삭제 성공 응답 처리 오류
+
+- 재현 `3897f2a`, 수정 `1f66586`. 삭제 응답을 Comment 객체로 가정하고, 아니면 실패로 처리하도록 `comment.js`를 의도적으로 바꿨다.
+- 실행: `node --test frontend/tests/comment.test.mjs`. API 대역은 `api.js`처럼 `data:null`이면 전체 `ApiResponse`를 반환한다.
+- 기대: DELETE 요청 후 댓글이 사라지고 빈 목록 안내가 표시된다.
+- 실제: 11건 중 1건 실패. DELETE 요청은 전송됐지만(서버에서는 삭제 성공) 화면에 댓글이 남았다. 실패 출력 `1 !== 0`.
+- 원인: 공통 `api.js`는 `body?.data ?? body`를 반환하므로 삭제 성공 결과는 `{success:true, message, data:null}`이다. 이를 Comment로 검사해 성공을 실패로 판단했다.
+- 수정: 삭제는 반환값을 사용하지 않고, 요청이 오류 없이 끝나면 성공으로 보고 해당 댓글을 목록에서 제거. 재검증 11건 통과.
+- 추가 확인: 실제 `frontend/js/api.js`와 서버 형태의 fetch 대역(jsdom)으로 `api.delete` 반환값 `{"success":true,"message":"댓글을 삭제했습니다.","data":null}`을 확인했고, 삭제 후 목록 0건·빈 목록 안내 표시·오류 문구 없음을 확인했다. 실제 서버 DELETE 응답은 HTTP 검사에서 확인한다.
