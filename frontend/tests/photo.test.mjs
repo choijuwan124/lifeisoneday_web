@@ -69,9 +69,9 @@ test("new editor selection is local until save and cancel restores no-photo stat
   assert.equal(editor.isDirty(), true);
   assert.equal(env.find("photo-widget-image").src, "blob:1");
   await input.dispatch("cancel");
-  assert.equal(editor.isDirty(), false);
   await editor.save(7);
-  assert.deepEqual(env.calls.map(call => call[0]), []);
+  assert.deepEqual(env.calls.map(call => call[0]), [], "canceling the picker must not trigger an upload or deletion");
+  assert.equal(editor.isDirty(), false);
   assert.deepEqual(env.revoked, ["blob:1"]);
   await editor.save(7);
   assert.deepEqual(env.calls.map(call => call[0]), []);
