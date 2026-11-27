@@ -299,3 +299,35 @@ test("remount and destroy remove listeners and ignore late responses", async () 
   assert.equal(page.listeners(), 0);
   assert.deepEqual(page.calls.map(call => call[0]), ["get", "get", "post"]);
 });
+
+test("refresh overlapping POST merges the saved ID once and preserves chronological order", async () => {
+  const page = setup({ list: [] });
+  const widget = await page.mount();
+  const saved = comment(50, "새 댓글", true);
+  const later = comment(51, "나중 댓글");
+  const post = deferred();
+  page.handlers.post = () => post.promise;
+  page.one("comment-widget-input").value = "새 댓글";
+  const sending = page.submit();
+  // GET sees the committed row while its original POST response is still in flight.
+  page.handlers.get = () => [saved, later];
+  await widget.refresh();
+  post.resolve(saved);
+  await sending;
+  assert.deepEqual(page.texts(), ["새 댓글", "나중 댓글"]);
+  assert.deepEqual(page.items().map(item => item.dataset.commentId), ["50", "51"]);
+});
+
+test("a late create response stays before a newer comment returned by refresh", async () => {
+  const page = setup({ list: [] });
+  const widget = await page.mount();
+  const post = deferred();
+  page.handlers.post = () => post.promise;
+  page.one("comment-widget-input").value = "먼저 작성";
+  const sending = page.submit();
+  page.handlers.get = () => [comment(51, "나중 작성")];
+  await widget.refresh();
+  post.resolve(comment(50, "먼저 작성", true));
+  await sending;
+  assert.deepEqual(page.texts(), ["먼저 작성", "나중 작성"]);
+});
