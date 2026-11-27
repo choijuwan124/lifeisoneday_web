@@ -47,8 +47,8 @@ class PhotoStorageTests {
         assertThrows(PhotoStorage.InvalidPhotoException.class, () -> storage.store(file("x.jpg", "image/jpeg", new byte[0])));
         assertThrows(PhotoStorage.UnsupportedPhotoException.class,
                 () -> storage.store(file("x.jpg", "image/jpeg", "not an image".getBytes())));
-        assertThrows(PhotoStorage.UnsupportedPhotoException.class,
-                () -> storage.store(file("x.gif", "image/gif", image("png", 2, 2))));
+        PhotoStorage.StoredPhoto actualPng = storage.store(file("x.gif", "image/gif", image("png", 2, 2)));
+        assertEquals("image/png", actualPng.contentType(), "actual image content decides the stored type");
         assertThrows(PhotoStorage.UnsupportedPhotoException.class,
                 () -> storage.store(file("x.png", "image/png", hugePngHeader(5000, 4001))));
     }
