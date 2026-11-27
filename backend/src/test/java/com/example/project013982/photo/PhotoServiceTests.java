@@ -64,6 +64,23 @@ class PhotoServiceTests {
     }
 
     @Test
+    void transactionRollbackKeepsPreviousPhotoAndRemovesNewFile() {
+        allowAuthor();
+        Photo old = photo("old.png");
+        Photo next = new Photo(2L, DIARY, "new.png", "image/png", 10, LocalDateTime.now(), LocalDateTime.now());
+        when(repository.findByDiaryId(DIARY)).thenReturn(Optional.of(old));
+        when(storage.store(any())).thenReturn(new PhotoStorage.StoredPhoto("new.png", "image/png", 10));
+        when(repository.save(DIARY, "new.png", "image/png", 10)).thenReturn(next);
+        TransactionSynchronizationManager.initSynchronization();
+
+        service.replace(ME, GROUP, DIARY, new MockMultipartFile("file", "x.png", "image/png", new byte[]{1}));
+        TransactionSynchronizationManager.getSynchronizations().forEach(s -> s.afterCompletion(1));
+
+        verify(cleanup).deleteAfterCommit(List.of("new.png"));
+        verify(cleanup, never()).deleteAfterCommit(List.of("old.png"));
+    }
+
+    @Test
     void deleteOfAbsentPhotoIsIdempotentAfterAuthorization() {
         allowAuthor();
         when(repository.findByDiaryId(DIARY)).thenReturn(Optional.empty());
