@@ -60,13 +60,13 @@ public class PhotoService {
     }
 
     /** Capture these keys inside the caller's diary/group deletion transaction, before cascading SQL. */
-    @Transactional(readOnly = true)
+    @Transactional
     public List<String> storageKeysForDiaryDeletion(Long diaryId) {
         return cleanup.storageKeysForDiary(diaryId);
     }
 
     /** Capture keys before the caller deletes all diaries in a group. */
-    @Transactional(readOnly = true)
+    @Transactional
     public List<String> storageKeysForGroupDeletion(Long groupId) {
         return cleanup.storageKeysForGroup(groupId);
     }
