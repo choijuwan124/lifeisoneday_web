@@ -70,11 +70,28 @@ test("new editor selection is local until save and cancel restores no-photo stat
   assert.equal(env.find("photo-widget-image").src, "blob:1");
   await input.dispatch("cancel");
   assert.equal(editor.isDirty(), false);
+  await editor.save(7);
   assert.deepEqual(env.calls.map(call => call[0]), []);
   assert.deepEqual(env.revoked, ["blob:1"]);
   await editor.save(7);
   assert.deepEqual(env.calls.map(call => call[0]), []);
   editor.destroy();
+});
+
+test("canceling a replacement preserves the server photo without revoking its visible URL", async () => {
+  const env = setup({ metadata: photo });
+  const editor = await env.window.PhotoUI.mountEditor({ root: env.root, groupId: 4, diaryId: 7 });
+  const input = env.find("photo-widget-input");
+  input.files = [new Blob(["replacement"])];
+  await input.dispatch("change");
+  assert.deepEqual(env.revoked, []);
+  await input.dispatch("cancel");
+  assert.equal(env.find("photo-widget-image").src, "blob:1");
+  assert.deepEqual(env.revoked, ["blob:2"]);
+  await editor.save(7);
+  assert.deepEqual(env.calls.map(call => call[0]), ["get", "getBlob"]);
+  editor.destroy();
+  assert.deepEqual(env.revoked, ["blob:2", "blob:1"]);
 });
 
 test("existing photo delete is explicit and null-data response succeeds", async () => {
