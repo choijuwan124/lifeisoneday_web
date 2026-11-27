@@ -48,7 +48,7 @@
     const form = make("form", "comment-widget-form");
     const input = make("textarea", "comment-widget-input");
     input.setAttribute("aria-label", "댓글 입력");
-    input.setAttribute("maxlength", String(MAX_LENGTH));
+    // Native maxlength counts UTF-16 units, so validate code points on submission instead.
     input.setAttribute("rows", "3");
     input.setAttribute("placeholder", "댓글을 입력하세요");
     const submit = make("button", "comment-widget-submit", "댓글 작성");
@@ -97,7 +97,6 @@
       if (edit) {
         const box = make("textarea", "comment-widget-edit-input");
         box.setAttribute("aria-label", "댓글 수정");
-        box.setAttribute("maxlength", String(MAX_LENGTH));
         box.value = edit.draft;
         box.disabled = edit.pending;
         const save = make("button", "comment-widget-save", "저장");
@@ -188,7 +187,9 @@
         const created = await window.api.post(path, { content: checked.content });
         if (destroyed) return;
         if (!isComment(created)) throw new Error("작성한 댓글을 확인할 수 없습니다. 목록을 다시 불러와 주세요.");
-        comments = [...comments, created];
+        // A concurrent refresh may already contain this POST's committed row.
+        comments = [...comments.filter(comment => comment.id !== created.id), created]
+          .sort((left, right) => left.createdAt.localeCompare(right.createdAt) || left.id - right.id);
         version += 1;
         input.value = ""; // only after the server confirmed the new comment
       } catch (error) {
