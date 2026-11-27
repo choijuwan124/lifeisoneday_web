@@ -160,7 +160,7 @@
       deleting = false;
       render();
     });
-    ui.listen(input, "cancel", resetSelection);
+    ui.listen(input, "cancel", () => { input.value = ""; render(); });
     ui.listen(stateButton, "click", () => {
       if (selectedFile) resetSelection();
       else {
