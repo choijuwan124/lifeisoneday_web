@@ -84,3 +84,17 @@ HTTP 실검사는 폐기 가능한 테스트 DB와 임시 업로드 폴더에 �
 - 수정 커밋: `8d47cc579d4c6e98f6e3638417bb84ee738e7d93`. 취소 이벤트가 선택 파일·URL을 정리하고 기존 사진 상태를 복원하도록 연결했다.
 - 재검증: 같은 명령에서 6건 통과. 취소 후 PUT·DELETE가 없고, 기존 사진은 계속 표시되며, 취소한 임시 URL은 revoke된다.
 - 범위: Node의 DOM·API 대역 검사. 파일 선택 대화상자를 띄운 실제 Chrome 검증은 아니다.
+
+## [실습] 3. metadata 저장 실패 뒤 새 파일 잔류
+
+- 구분: 정상 서비스 검사 통과 후 일부러 저장소 정리 호출을 제거했다.
+- 기준 검사: `PhotoServiceTests` 5건 통과. 추가 파일 검사는 실제 임시 디렉터리, ImageIO로 만든 정상 PNG, 실제 `PhotoStorage`·`PhotoCleanupService`, 저장 실패를 던지는 Mockito `PhotoRepository` 대역을 사용한다.
+- 최초 재현 커밋: `a6ef9a73dd38e3b801688e9992b9ce2474261d41`. DB 대역 오류 경로에서 새 키 정리를 생략했다. `PhotoServiceTests` 5건 중 1건이 `WantedButNotInvoked`로 실패했다.
+- 실제 파일 재현 검사 추가 커밋: `6857655`. 정리 누락 상태에서 파일 검사를 실행해도 검사로 확인되도록 임시 디렉터리 검사를 별도 추가했다.
+- 파일 재현 커밋: `71399b761945fd0c4170d3b049c89758bfb05e0a`.
+- 실행: `.\backend\gradlew.bat -p backend test --tests '*PhotoServiceTests.realNewFileIsRemovedAfterRepositoryFailureAndOldFileAndMetadataRemain' --no-daemon --console=plain`.
+- 실제 실패: 1건. `realNewFileIsRemovedAfterRepositoryFailureAndOldFileAndMetadataRemain`에서 임시 폴더가 기존 키 하나만 포함하기를 기대했지만 새 UUID PNG가 남아 파일 목록 검사가 실패했다.
+- 원인: metadata 저장 예외 경로에서 새 저장 파일을 삭제하지 않았다.
+- 수정 커밋: mock 실패 경로 `2f8b07d`, 실제 파일 경로 `662194f8e1217bad4368a86f2197854aacbc641f`. 저장 예외 때 새 키를 즉시 정리하도록 복구했다.
+- 재검증: 같은 파일 검사 1건 통과. 기존 PNG 바이트·metadata 대역 값은 유지되고 임시 폴더에는 기존 파일만 남았다.
+- 검증 한계: 저장소는 Mockito 대역이며 실제 MySQL 연결·롤백 검증은 아니다. 실제 사진 파일 저장·삭제는 임시 디렉터리에서 수행했다.
