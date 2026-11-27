@@ -45,6 +45,7 @@ public class PhotoService {
             registerFileCompletion(stored.storageKey(), previous.map(Photo::storageKey).orElse(null));
             return PhotoResponse.from(saved, groupId);
         } catch (RuntimeException exception) {
+            cleanup.deleteAfterCommit(List.of(stored.storageKey()));
             throw exception;
         }
     }
