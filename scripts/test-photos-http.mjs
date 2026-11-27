@@ -13,9 +13,10 @@ const tinyPng = Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAADUl
 
 function client() {
   let cookie;
-  const call = async (method, path, expected, data, { binary = false } = {}) => {
+  const call = async (method, path, expected, data, { binary = false, json = false, details = false } = {}) => {
     const headers = { Accept: binary ? "image/png, image/jpeg, application/json" : "application/json" };
     if (cookie) headers.Cookie = cookie;
+    if (json) headers["Content-Type"] = "application/json";
     const response = await fetch(base + path, {
       method, headers, body: data,
       signal: AbortSignal.timeout(20000),
@@ -26,13 +27,14 @@ function client() {
     const body = isJson ? await response.json() : Buffer.from(await response.arrayBuffer());
     assert.equal(response.status, expected, `${method} ${path}: ${isJson ? body.message : response.statusText}`);
     if (isJson) assert.equal(body.success, expected < 400);
-    return isJson ? body.data : body;
+    const result = isJson ? body.data : body;
+    return details ? { data: result, status: response.status, headers: response.headers } : result;
   };
   return { call, upload: (path, bytes, filename = "photo.png", type = "image/png", expected = 200) => {
     const form = new FormData();
     form.append("file", new Blob([bytes], { type }), filename);
     return call("PUT", path, expected, form);
-  } };
+  }, binary: (path, expected = 200) => call("GET", path, expected, undefined, { binary: true, details: true }) };
 }
 
 async function register() {
@@ -84,12 +86,12 @@ test("accepts a real PNG padded to exactly 5 MiB and returns matching private by
   assert.equal(saved.contentPath, `${path}/content`);
   assert.equal("storageKey" in saved, false);
 
-  const response = await fetch(base + saved.contentPath, {
-    headers: { Cookie: owner.cookie, Accept: "image/png, image/jpeg, application/json" },
-  });
-  // cookie is private inside client, use the client helper below for bytes and check headers in a session-aware follow-up.
-  assert.equal(response.status, 401);
-  assert(exact.length === 5 * 1024 * 1024);
+  const response = await owner.binary(saved.contentPath);
+  assert.equal(response.status, 200);
+  assert.equal(response.headers.get("content-type"), "image/png");
+  assert.equal(response.headers.get("cache-control"), "no-store");
+  assert.equal(response.headers.get("x-content-type-options"), "nosniff");
+  assert.deepEqual(response.data, exact);
 });
 
 test("rejects empty, spoofed and over-limit files and protects authorship", async () => {
@@ -110,15 +112,15 @@ test("rejects empty, spoofed and over-limit files and protects authorship", asyn
 });
 
 test("replaces and deletes metadata and binary consistently", async () => {
-  const normal = await author.upload(path, tinyPng);
+  const normal = await owner.upload(path, tinyPng);
   assert.equal(normal.contentType, "image/png");
-  const bytes = await author.call("GET", normal.contentPath, 200, undefined, { binary: true });
-  assert.deepEqual(bytes, tinyPng);
-  const replaced = await author.upload(path, tinyPng, "second.png");
+  const bytes = await owner.binary(normal.contentPath);
+  assert.deepEqual(bytes.data, tinyPng);
+  const replaced = await owner.upload(path, tinyPng, "second.png");
   assert.equal(replaced.diaryId, diary);
   assert.equal((await author.call("GET", path, 200)).id, replaced.id);
-  assert.equal(await author.call("DELETE", path, 200), null);
-  assert.equal(await author.call("DELETE", path, 200), null);
-  assert.equal(await author.call("GET", path, 200), null);
-  await author.call("GET", `${path}/content`, 404);
+  assert.equal(await owner.call("DELETE", path, 200), null);
+  assert.equal(await owner.call("DELETE", path, 200), null);
+  assert.equal(await owner.call("GET", path, 200), null);
+  await owner.call("GET", `${path}/content`, 404);
 });
