@@ -183,6 +183,7 @@
       if (checked.error) { setMessage(checked.error); return; }
       creating = true;
       setMessage("");
+      input.value = ""; // [실습] 요청 성공 전에 입력창을 비움
       render();
       try {
         const created = await window.api.post(path, { content: checked.content });
