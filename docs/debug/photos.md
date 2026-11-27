@@ -98,3 +98,15 @@ HTTP 실검사는 폐기 가능한 테스트 DB와 임시 업로드 폴더에 �
 - 수정 커밋: mock 실패 경로 `2f8b07d`, 실제 파일 경로 `662194f8e1217bad4368a86f2197854aacbc641f`. 저장 예외 때 새 키를 즉시 정리하도록 복구했다.
 - 재검증: 같은 파일 검사 1건 통과. 기존 PNG 바이트·metadata 대역 값은 유지되고 임시 폴더에는 기존 파일만 남았다.
 - 검증 한계: 저장소는 Mockito 대역이며 실제 MySQL 연결·롤백 검증은 아니다. 실제 사진 파일 저장·삭제는 임시 디렉터리에서 수행했다.
+
+## [실습] 4. 미리보기 객체 URL 해제 누락
+
+- 구분: 정상 미리보기 URL 검사 통과 후 실제 `URL.revokeObjectURL` 호출을 일부러 제거했다.
+- 기준 검사: `node --test frontend/tests/photo.test.mjs` 7건 통과. 선택 교체·취소·저장·삭제·Viewer refresh·destroy 시 URL 수명과, 아직 표시하거나 취소 복원에 필요한 URL을 너무 일찍 해제하지 않는지 검사한다.
+- 재현 커밋: `2bd805503076fef02aead0c15ea47d3baac1cea7`.
+- 실행: `node --test frontend/tests/photo.test.mjs`.
+- 실제 실패: 7건 중 6건. 선택 취소 기대 `['blob:1']`, 실제 `[]`; 기존 사진 교체 취소 기대 `['blob:2']`, 실제 `[]`; 로컬 선택 교체·삭제·destroy·Viewer refresh에서도 해제 배열이 비어 있어 각 기대값과 달랐다.
+- 원인: UI의 URL 추적 집합에서 항목만 지우고 브라우저 URL 해제 API를 부르지 않았다.
+- 수정 커밋: `c1c94b1e4ef92b8825dfae632c85dc5c820a6142`. 추적 중인 URL마다 실제 `URL.revokeObjectURL`을 호출한다.
+- 재검증: 같은 명령에서 7건 통과. 현재 표시 중인 URL은 교체 전까지 유지하고, 취소·교체·삭제·destroy에서 더 이상 표시하지 않는 URL만 해제한다.
+- 범위: Node의 URL API 대역 검사다. 실제 Chrome 메모리 프로파일 검증은 아니다.
