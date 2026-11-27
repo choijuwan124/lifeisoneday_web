@@ -32,7 +32,7 @@ public class PhotoStorage {
 
     public StoredPhoto store(MultipartFile file) {
         if (file == null || file.isEmpty()) throw new InvalidPhotoException("사진 파일을 선택해 주세요.");
-        if (file.getSize() > MAX_BYTES) throw new PhotoTooLargeException();
+        if (file.getSize() >= MAX_BYTES) throw new PhotoTooLargeException();
         final byte[] bytes;
         try {
             bytes = file.getBytes();
