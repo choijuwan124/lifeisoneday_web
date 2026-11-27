@@ -89,9 +89,19 @@ public class PhotoController {
         return failure(HttpStatus.UNSUPPORTED_MEDIA_TYPE, exception.getMessage());
     }
 
+    @ExceptionHandler(PhotoStorage.InvalidPhotoException.class)
+    public ResponseEntity<ApiResponse<Void>> invalidPhoto(RuntimeException exception) {
+        return failure(HttpStatus.BAD_REQUEST, exception.getMessage());
+    }
+
     @ExceptionHandler(PhotoStorage.PhotoTooLargeException.class)
     public ResponseEntity<ApiResponse<Void>> tooLarge(RuntimeException exception) {
         return failure(HttpStatus.PAYLOAD_TOO_LARGE, exception.getMessage());
+    }
+
+    @ExceptionHandler(PhotoStorage.PhotoMissingFileException.class)
+    public ResponseEntity<ApiResponse<Void>> missingFile(RuntimeException exception) {
+        return failure(HttpStatus.NOT_FOUND, exception.getMessage());
     }
 
     private static Long userId(HttpServletRequest request) {
