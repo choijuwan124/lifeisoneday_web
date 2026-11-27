@@ -1,7 +1,6 @@
 // Private diary photo viewer/editor. Load after api.js; diary pages own their HTML and mount into a root.
 (() => {
   const mounts = new WeakMap();
-  const widgets = new WeakMap();
 
   function dataOrNull(value) {
     if (value?.success === true && value.data === null) return null;
@@ -78,44 +77,41 @@
   }
 
   async function mountViewer({ root, groupId, diaryId }) {
-    const widget = mountRoot(root, "일기 사진", async ui => {
-      const path = apiPath(groupId, diaryId);
-      let currentUrl = null;
-      const load = async () => {
-        const token = ui.nextRevision();
-        ui.message.textContent = "사진을 불러오는 중입니다.";
-        ui.retry.hidden = true;
-        try {
-          const photo = dataOrNull(await window.api.get(path));
-          if (!ui.isCurrent(token)) return;
-          if (photo === null) {
-            currentUrl && ui.revoke(currentUrl);
-            currentUrl = null;
-            ui.preview.replaceChildren(ui.make("p", "photo-widget-empty", "등록된 사진이 없습니다."));
-            ui.message.textContent = "";
-            return;
-          }
-          if (!isPhoto(photo)) throw new Error("사진 정보를 확인하지 못했습니다.");
-          const blob = await window.api.getBlob(photo.contentPath);
-          if (!ui.isCurrent(token)) return;
-          const nextUrl = ui.createUrl(blob);
-          ui.preview.replaceChildren(ui.image(nextUrl));
+    const ui = mountRoot(root, "일기 사진", () => {});
+    const path = apiPath(groupId, diaryId);
+    let currentUrl = null;
+    const load = async () => {
+      const token = ui.nextRevision();
+      ui.message.textContent = "사진을 불러오는 중입니다.";
+      ui.retry.hidden = true;
+      try {
+        const photo = dataOrNull(await window.api.get(path));
+        if (!ui.isCurrent(token)) return;
+        if (photo === null) {
           if (currentUrl) ui.revoke(currentUrl);
-          currentUrl = nextUrl;
+          currentUrl = null;
+          ui.preview.replaceChildren(ui.make("p", "photo-widget-empty", "등록된 사진이 없습니다."));
           ui.message.textContent = "";
-        } catch (error) {
-          if (!ui.isCurrent(token)) return;
-          ui.message.textContent = error?.message ?? "사진을 불러오지 못했습니다.";
-          ui.retry.hidden = false;
+          return;
         }
-      };
-      ui.section.append(ui.preview, ui.message, ui.retry);
-      ui.listen(ui.retry, "click", () => { void load(); });
-      await load();
-      return { refresh: load, destroy: ui.destroy };
-    });
-    // build is async; its handle is assigned once initial load settles, unless destroy already ran.
-    return widget;
+        if (!isPhoto(photo)) throw new Error("사진 정보를 확인하지 못했습니다.");
+        const blob = await window.api.getBlob(photo.contentPath);
+        if (!ui.isCurrent(token)) return;
+        const nextUrl = ui.createUrl(blob);
+        ui.preview.replaceChildren(ui.image(nextUrl));
+        if (currentUrl) ui.revoke(currentUrl);
+        currentUrl = nextUrl;
+        ui.message.textContent = "";
+      } catch (error) {
+        if (!ui.isCurrent(token)) return;
+        ui.message.textContent = error?.message ?? "사진을 불러오지 못했습니다.";
+        ui.retry.hidden = false;
+      }
+    };
+    ui.section.append(ui.preview, ui.message, ui.retry);
+    ui.listen(ui.retry, "click", () => { void load(); });
+    await load();
+    return { refresh: load, destroy: ui.destroy };
   }
 
   async function mountEditor({ root, groupId, diaryId = null }) {
