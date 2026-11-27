@@ -5,15 +5,22 @@ import org.junit.jupiter.api.Test;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.mock.web.MockMultipartFile;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import org.junit.jupiter.api.io.TempDir;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 class PhotoServiceTests {
     private static final long GROUP = 4, DIARY = 7, ME = 9, FRIEND = 10;
+    @TempDir Path temp;
     private final PhotoRepository repository = mock(PhotoRepository.class);
     private final PhotoStorage storage = mock(PhotoStorage.class);
     private final PhotoCleanupService cleanup = mock(PhotoCleanupService.class);
@@ -81,6 +88,33 @@ class PhotoServiceTests {
     }
 
     @Test
+    void realNewFileIsRemovedAfterRepositoryFailureAndOldFileAndMetadataRemain() throws Exception {
+        Path uploadRoot = temp.resolve("uploads");
+        Files.createDirectories(uploadRoot);
+        String oldKey = "123e4567-e89b-12d3-a456-426614174000.png";
+        byte[] oldBytes = png();
+        Files.write(uploadRoot.resolve(oldKey), oldBytes);
+        Photo old = photo(oldKey);
+        when(repository.lockDiary(GROUP, DIARY)).thenReturn(Optional.of(new PhotoRepository.DiaryOwner(GROUP, ME)));
+        when(repository.lockMembership(GROUP, ME)).thenReturn(true);
+        when(repository.findByDiaryId(DIARY)).thenReturn(Optional.of(old));
+        when(repository.save(eq(DIARY), anyString(), eq("image/png"), anyLong()))
+                .thenThrow(new IllegalStateException("simulated DB failure"));
+        PhotoStorage realStorage = new PhotoStorage(uploadRoot.toString());
+        PhotoCleanupService realCleanup = new PhotoCleanupService(repository, realStorage, uploadRoot.toString());
+        PhotoService realService = new PhotoService(repository, realStorage, realCleanup);
+
+        assertThrows(IllegalStateException.class, () -> realService.replace(ME, GROUP, DIARY,
+                new MockMultipartFile("file", "new.png", "image/png", png())));
+
+        try (var files = Files.list(uploadRoot)) {
+            assertEquals(List.of(oldKey), files.map(file -> file.getFileName().toString()).toList());
+        }
+        assertArrayEquals(oldBytes, Files.readAllBytes(uploadRoot.resolve(oldKey)));
+        assertEquals(Optional.of(old), repository.findByDiaryId(DIARY));
+    }
+
+    @Test
     void deleteOfAbsentPhotoIsIdempotentAfterAuthorization() {
         allowAuthor();
         when(repository.findByDiaryId(DIARY)).thenReturn(Optional.empty());
@@ -106,5 +140,13 @@ class PhotoServiceTests {
 
     private static Photo photo(String key) {
         return new Photo(1L, DIARY, key, "image/png", 12, LocalDateTime.now(), LocalDateTime.now());
+    }
+
+    private static byte[] png() throws Exception {
+        BufferedImage image = new BufferedImage(2, 2, BufferedImage.TYPE_INT_RGB);
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
+        ImageIO.write(image, "png", output);
+        image.flush();
+        return output.toByteArray();
     }
 }
