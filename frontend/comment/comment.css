@@ -1,0 +1,153 @@
+/* Every rule is scoped to .comment-widget so it cannot restyle the diary page around it. */
+.comment-widget {
+  display: grid;
+  gap: 0.75rem;
+  margin-block: 1.5rem;
+}
+
+.comment-widget .comment-widget-title {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.comment-widget .comment-widget-list {
+  display: grid;
+  gap: 0.6rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.comment-widget .comment-widget-item {
+  display: grid;
+  gap: 0.35rem;
+  padding: 0.75rem 0.9rem;
+  border: 1px solid #e6dfd2;
+  border-radius: 10px;
+  background: #fff;
+}
+
+.comment-widget .comment-widget-item[aria-busy="true"] {
+  opacity: 0.65;
+}
+
+.comment-widget .comment-widget-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.25rem 0.6rem;
+  margin: 0;
+  font-size: 0.85rem;
+  color: #6b655c;
+}
+
+.comment-widget .comment-widget-author {
+  font-weight: 700;
+  color: #2f2b26;
+}
+
+.comment-widget .comment-widget-edited {
+  font-style: italic;
+}
+
+.comment-widget .comment-widget-content {
+  margin: 0;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.comment-widget .comment-widget-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.comment-widget button {
+  min-block-size: 2.25rem;
+  padding: 0.3rem 0.85rem;
+  border: 1px solid #3e5946;
+  border-radius: 8px;
+  background: #fff;
+  color: #3e5946;
+  font: inherit;
+  cursor: pointer;
+}
+
+.comment-widget .comment-widget-submit,
+.comment-widget .comment-widget-save {
+  background: #3e5946;
+  color: #fff;
+}
+
+.comment-widget .comment-widget-delete {
+  border-color: #9b203c;
+  color: #9b203c;
+}
+
+.comment-widget button:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+.comment-widget button:focus-visible,
+.comment-widget textarea:focus-visible {
+  outline: 2px solid #3e5946;
+  outline-offset: 2px;
+}
+
+.comment-widget textarea {
+  box-sizing: border-box;
+  inline-size: 100%;
+  min-block-size: 4.5rem;
+  padding: 0.6rem 0.7rem;
+  border: 1px solid #cfc6b6;
+  border-radius: 8px;
+  font: inherit;
+  line-height: 1.5;
+  resize: vertical;
+}
+
+.comment-widget textarea:disabled {
+  background: #f4f1ea;
+}
+
+.comment-widget .comment-widget-form {
+  display: grid;
+  gap: 0.5rem;
+  justify-items: end;
+}
+
+.comment-widget .comment-widget-empty {
+  margin: 0;
+  color: #6b655c;
+}
+
+.comment-widget .comment-widget-message,
+.comment-widget .comment-widget-item-message {
+  margin: 0;
+  color: #9b203c;
+}
+
+.comment-widget .comment-widget-message:empty,
+.comment-widget .comment-widget-item-message:empty {
+  display: none;
+}
+
+.comment-widget [hidden] {
+  display: none;
+}
+
+@media (max-width: 480px) {
+  .comment-widget .comment-widget-item {
+    padding: 0.65rem 0.7rem;
+  }
+
+  .comment-widget .comment-widget-form {
+    justify-items: stretch;
+  }
+
+  .comment-widget button {
+    min-block-size: 2.75rem;
+  }
+}
