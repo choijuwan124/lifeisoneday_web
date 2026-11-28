@@ -95,6 +95,7 @@ test("accepts a real PNG padded to exactly 5 MiB and returns matching private by
 });
 
 test("rejects empty, spoofed and over-limit files and protects authorship", async () => {
+  await owner.call("PUT", path, 400, new FormData()); // missing `file` part
   const empty = new FormData(); empty.append("file", new Blob([]), "empty.png");
   await owner.call("PUT", path, 400, empty);
   await owner.upload(path, Buffer.from("not an image"), "fake.png", "image/png", 415);
