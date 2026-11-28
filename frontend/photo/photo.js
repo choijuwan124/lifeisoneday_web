@@ -134,8 +134,10 @@
     let selectedFile = null;
     let selectedUrl = null;
     let deleting = false;
+    let pendingSave = null;
 
     const resetSelection = () => {
+      if (ui.destroyed || pendingSave) return;
       selectedFile = null;
       input.value = "";
       if (selectedUrl) ui.revoke(selectedUrl);
@@ -144,14 +146,21 @@
       render();
     };
     const render = () => {
+      if (ui.destroyed) return;
+      const saving = pendingSave !== null;
+      input.disabled = saving;
+      stateButton.disabled = saving;
+      ui.retry.disabled = saving;
+      ui.section.setAttribute("aria-busy", String(saving));
       if (selectedUrl) ui.preview.replaceChildren(ui.image(selectedUrl, "선택한 사진 미리보기"));
       else if (currentUrl && !deleting) ui.preview.replaceChildren(ui.image(currentUrl));
       else ui.preview.replaceChildren(ui.make("p", "photo-widget-empty", "등록된 사진이 없습니다."));
       stateButton.hidden = !selectedFile && !currentPhoto;
       stateButton.textContent = selectedFile ? "선택 취소" : deleting ? "삭제 취소" : "사진 삭제";
-      ui.message.textContent = "";
+      ui.message.textContent = saving ? "사진을 저장하는 중입니다." : "";
     };
     ui.listen(input, "change", () => {
+      if (ui.destroyed || pendingSave) return;
       const file = input.files?.[0];
       if (!file) { resetSelection(); return; }
       if (selectedUrl) ui.revoke(selectedUrl);
@@ -162,6 +171,7 @@
     });
     ui.listen(input, "cancel", resetSelection);
     ui.listen(stateButton, "click", () => {
+      if (ui.destroyed || pendingSave) return;
       if (selectedFile) resetSelection();
       else {
         deleting = !deleting;
@@ -171,6 +181,7 @@
     ui.listen(ui.retry, "click", () => { void loadExisting(); });
 
     const loadExisting = async () => {
+      if (ui.destroyed || pendingSave) return;
       if (diaryId == null) { render(); return; }
       const token = ui.nextRevision();
       ui.message.textContent = "기존 사진을 불러오는 중입니다.";
@@ -198,39 +209,52 @@
     if (diaryId != null) await loadExisting();
     else render();
     return {
-      async save(savedDiaryId) {
-        if (ui.destroyed) throw new Error("사진 편집기가 해제되었습니다.");
+      save(savedDiaryId) {
+        if (ui.destroyed) return Promise.reject(new Error("사진 편집기가 해제되었습니다."));
         const id = savedDiaryId ?? diaryId;
-        if (!Number.isInteger(Number(id)) || Number(id) <= 0) throw new TypeError("일기를 먼저 저장해 주세요.");
-        if (!selectedFile && !deleting) return currentPhoto;
-        if (selectedFile) {
-          const form = new ui.view.FormData();
-          form.append("file", selectedFile);
-          const result = dataOrNull(await window.api.upload(pathFor(id), form));
-          if (!isPhoto(result)) throw new Error("사진 저장 결과를 확인하지 못했습니다.");
+        if (!Number.isInteger(Number(id)) || Number(id) <= 0) return Promise.reject(new TypeError("일기를 먼저 저장해 주세요."));
+        if (pendingSave) return pendingSave;
+        if (!selectedFile && !deleting) return Promise.resolve(currentPhoto);
+        // Freeze the submitted selection and invalidate older metadata/blob reads.
+        const submittedFile = selectedFile;
+        const submittedUrl = selectedUrl;
+        ui.nextRevision();
+        pendingSave = Promise.resolve().then(async () => {
+          if (ui.destroyed) throw new Error("사진 편집기가 해제되었습니다.");
+          if (submittedFile) {
+            const form = new ui.view.FormData();
+            form.append("file", submittedFile);
+            const result = dataOrNull(await window.api.upload(pathFor(id), form));
+            if (!isPhoto(result)) throw new Error("사진 저장 결과를 확인하지 못했습니다.");
+            if (ui.destroyed) return result;
+            if (currentUrl) ui.revoke(currentUrl);
+            currentPhoto = result;
+            currentUrl = submittedUrl;
+            selectedUrl = null;
+            selectedFile = null;
+            input.value = "";
+            deleting = false;
+            diaryId = Number(id);
+            return currentPhoto;
+          }
+          await window.api.delete(pathFor(id)); // data:null is a successful ApiResponse in api.js.
+          if (ui.destroyed) return null;
           if (currentUrl) ui.revoke(currentUrl);
-          currentPhoto = result;
-          currentUrl = selectedUrl;
+          if (selectedUrl) ui.revoke(selectedUrl);
+          currentUrl = null;
           selectedUrl = null;
           selectedFile = null;
-          input.value = "";
+          currentPhoto = null;
           deleting = false;
+          input.value = "";
           diaryId = Number(id);
+          return null;
+        }).finally(() => {
+          pendingSave = null;
           render();
-          return currentPhoto;
-        }
-        await window.api.delete(pathFor(id)); // data:null is a successful ApiResponse in api.js.
-        if (currentUrl) ui.revoke(currentUrl);
-        if (selectedUrl) ui.revoke(selectedUrl);
-        currentUrl = null;
-        selectedUrl = null;
-        selectedFile = null;
-        currentPhoto = null;
-        deleting = false;
-        input.value = "";
-        diaryId = Number(id);
+        });
         render();
-        return null;
+        return pendingSave;
       },
       isDirty: () => selectedFile !== null || deleting,
       destroy: ui.destroy,
