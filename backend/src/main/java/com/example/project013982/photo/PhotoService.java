@@ -39,8 +39,8 @@ public class PhotoService {
     public PhotoResponse replace(Long userId, Long groupId, Long diaryId, MultipartFile file) {
         authorize(userId, groupId, diaryId, true);
         PhotoStorage.StoredPhoto stored = storage.store(file);
-        Optional<Photo> previous = repository.findByDiaryId(diaryId);
         try {
+            Optional<Photo> previous = repository.findByDiaryId(diaryId);
             Photo saved = repository.save(diaryId, stored.storageKey(), stored.contentType(), stored.sizeBytes());
             registerFileCompletion(stored.storageKey(), previous.map(Photo::storageKey).orElse(null));
             return PhotoResponse.from(saved, groupId);
