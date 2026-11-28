@@ -157,6 +157,7 @@
       loading.hidden = true;
       byId("diary-detail").hidden = false;
       await mountDetailWidget("diary-like-root", window.LikeUI, "mount", "좋아요");
+      await mountDetailWidget("diary-comment-root", window.CommentUI, "mount", "댓글");
     } catch (e) { loading.hidden = true; showError(e.message || "일기를 불러오지 못했습니다."); }
   }
   async function initEdit() {
