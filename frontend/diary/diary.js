@@ -10,6 +10,8 @@
   const groupId = positiveId(params.get("groupId"));
   const diaryId = positiveId(params.get("diaryId"));
   const error = byId("diary-error");
+  const detailWidgets = new Map();
+  const pendingWidgetMounts = new Map();
   function showError(message) {
     if (!error) return;
     error.textContent = message;
@@ -41,6 +43,38 @@
   }
   function requireIds(needsDiary) {
     if (!groupId || (needsDiary && !diaryId)) throw new Error("주소의 일기장 또는 일기 번호가 올바르지 않습니다.");
+  }
+  async function mountDetailWidget(rootId, ui, method, label) {
+    const root = byId(rootId);
+    if (!root) return;
+    if (detailWidgets.has(rootId)) return detailWidgets.get(rootId);
+    if (pendingWidgetMounts.has(rootId)) return pendingWidgetMounts.get(rootId);
+    const mounting = (async () => {
+      try {
+        if (typeof ui?.[method] !== "function") throw new Error(`${label} 기능을 준비하지 못했습니다.`);
+        const widget = await ui[method]({root, groupId, diaryId});
+        if (widget?.destroy) detailWidgets.set(rootId, widget);
+        return widget;
+      } catch (widgetError) {
+        const message = document.createElement("p");
+        message.className = "diary-widget-fallback";
+        message.setAttribute("role", "status");
+        message.textContent = widgetError.message || `${label}을(를) 불러오지 못했습니다.`;
+        root.replaceChildren(message);
+        return null;
+      } finally {
+        pendingWidgetMounts.delete(rootId);
+      }
+    })();
+    pendingWidgetMounts.set(rootId, mounting);
+    return mounting;
+  }
+  function destroyDetailWidgets() {
+    for (const widget of detailWidgets.values()) widget.destroy?.();
+    detailWidgets.clear();
+  }
+  if (byId("diary-detail") && typeof window.addEventListener === "function") {
+    window.addEventListener("pagehide", destroyDetailWidgets);
   }
   async function loadList() {
     const loading = byId("diary-loading");
@@ -122,6 +156,7 @@
       }
       loading.hidden = true;
       byId("diary-detail").hidden = false;
+      await mountDetailWidget("diary-like-root", window.LikeUI, "mount", "좋아요");
     } catch (e) { loading.hidden = true; showError(e.message || "일기를 불러오지 못했습니다."); }
   }
   async function initEdit() {
