@@ -232,6 +232,22 @@
     const title = byId("diary-title");
     const content = byId("diary-content");
     const submit = byId("diary-submit");
+    const photoStatus = byId("diary-photo-save-status");
+    const photoRetryArea = byId("diary-photo-retry-area");
+    const photoRetry = byId("diary-photo-retry");
+    let editor = null;
+
+    function setPhotoStatus(message) {
+      if (!photoStatus) return;
+      photoStatus.textContent = message;
+      photoStatus.hidden = !message;
+    }
+    function lockDiaryFields() {
+      title.disabled = true;
+      content.disabled = true;
+      submit.disabled = true;
+    }
+
     try {
       requireIds(true);
       byId("diary-cancel").href = diaryUrl("diary-detail.html");
@@ -242,7 +258,37 @@
       title.value = entry.title;
       content.value = entry.content;
       form.hidden = false;
+      try {
+        if (typeof window.PhotoUI?.mountEditor !== "function") throw new Error("사진 편집기를 준비하지 못했습니다.");
+        editor = await window.PhotoUI.mountEditor({root: byId("diary-photo-editor-root"), groupId, diaryId});
+      } catch (photoError) {
+        setPhotoStatus(`${photoError.message || "사진 편집기를 불러오지 못했습니다."} 일기 내용은 수정할 수 있습니다.`);
+      }
+
+      let retryPending = false;
+      async function retryPhotoOnly() {
+        if (retryPending || !editor) return;
+        retryPending = true;
+        photoRetry.disabled = true;
+        photoRetry.setAttribute("aria-busy", "true");
+        setPhotoStatus("일기는 수정됐습니다. 사진을 다시 저장하고 있습니다.");
+        try {
+          await editor.save(diaryId);
+          photoRetryArea.hidden = true;
+          setPhotoStatus("");
+          window.location.assign(diaryUrl("diary-detail.html"));
+        } catch (photoError) {
+          setPhotoStatus(`일기는 수정됐지만 사진 저장에 실패했습니다. ${photoError.message || "사진을 저장하지 못했습니다."} 사진만 다시 저장할 수 있습니다.`);
+        } finally {
+          retryPending = false;
+          photoRetry.disabled = false;
+          photoRetry.removeAttribute("aria-busy");
+        }
+      }
+      photoRetry?.addEventListener("click", retryPhotoOnly);
+
       let pending = false;
+      let diaryPutSucceeded = false;
       form.addEventListener("submit", async (event) => {
         event.preventDefault();
         if (pending) return;
@@ -251,8 +297,26 @@
         pending = true; submit.disabled = true; form.setAttribute("aria-busy", "true"); error.hidden = true;
         try {
           await api("put", `/api/groups/${groupId}/diaries/${diaryId}`, {title: title.value.trim(), content: content.value});
+          diaryPutSucceeded = true;
+          lockDiaryFields();
+          if (editor?.isDirty?.()) setPhotoStatus("일기를 수정했습니다. 사진을 저장하는 중입니다.");
+          await editor?.save(diaryId);
+          setPhotoStatus("");
+          photoRetryArea.hidden = true;
           window.location.assign(diaryUrl("diary-detail.html"));
-        } catch (e) { showError(e.message || "일기를 수정하지 못했습니다."); pending = false; submit.disabled = false; form.removeAttribute("aria-busy"); }
+        } catch (saveError) {
+          if (diaryPutSucceeded) {
+            photoRetryArea.hidden = false;
+            setPhotoStatus(`일기는 수정됐지만 사진 저장에 실패했습니다. ${saveError.message || "사진을 저장하지 못했습니다."} 사진만 다시 저장할 수 있습니다.`);
+          } else {
+            showError(saveError.message || "일기를 수정하지 못했습니다.");
+            submit.disabled = false;
+          }
+        } finally {
+          pending = false;
+          form.removeAttribute("aria-busy");
+          if (diaryPutSucceeded) lockDiaryFields();
+        }
       });
     } catch (e) { loading.hidden = true; showError(e.message || "일기를 불러오지 못했습니다."); }
   }
