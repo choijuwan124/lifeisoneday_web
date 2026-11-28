@@ -1,0 +1,91 @@
+/* Photo styles stay inside this widget so existing diary pages are unaffected. */
+.photo-widget {
+  display: grid;
+  gap: 0.75rem;
+  margin-block: 1.25rem;
+}
+
+.photo-widget .photo-widget-preview {
+  display: grid;
+  place-items: center;
+  min-height: 5rem;
+  overflow: hidden;
+  border: 1px solid #e6dfd2;
+  border-radius: 12px;
+  background: #faf8f3;
+}
+
+.photo-widget .photo-widget-image {
+  display: block;
+  width: 100%;
+  max-height: min(65vh, 38rem);
+  object-fit: contain;
+}
+
+.photo-widget .photo-widget-empty,
+.photo-widget .photo-widget-message {
+  margin: 0;
+  padding: 0.85rem 1rem;
+  color: #68645d;
+  overflow-wrap: anywhere;
+}
+
+.photo-widget .photo-widget-message:empty {
+  display: none;
+}
+
+.photo-widget .photo-widget-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.photo-widget .photo-widget-change,
+.photo-widget .photo-widget-state,
+.photo-widget .photo-widget-retry {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.5rem;
+  padding: 0.4rem 0.9rem;
+  border: 1px solid #3e5946;
+  border-radius: 8px;
+  background: #fff;
+  color: #3e5946;
+  font: inherit;
+  cursor: pointer;
+}
+
+.photo-widget .photo-widget-change:focus-within,
+.photo-widget button:focus-visible {
+  outline: 3px solid #b8c9b9;
+  outline-offset: 2px;
+}
+
+.photo-widget .photo-widget-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.photo-widget .photo-widget-retry[hidden],
+.photo-widget .photo-widget-state[hidden] {
+  display: none;
+}
+
+@media (max-width: 480px) {
+  .photo-widget .photo-widget-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .photo-widget .photo-widget-change,
+  .photo-widget .photo-widget-state,
+  .photo-widget .photo-widget-retry {
+    width: 100%;
+    box-sizing: border-box;
+  }
+}
