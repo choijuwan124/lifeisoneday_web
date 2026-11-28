@@ -50,7 +50,7 @@
     if (!root) return;
     if (detailWidgets.has(rootId)) return detailWidgets.get(rootId);
     if (pendingWidgetMounts.has(rootId)) return pendingWidgetMounts.get(rootId);
-    const mounting = (async () => {
+    const mounting = Promise.resolve().then(async () => {
       try {
         if (typeof ui?.[method] !== "function") throw new Error(`${label} 기능을 준비하지 못했습니다.`);
         const widget = await ui[method]({root, groupId, diaryId});
@@ -70,7 +70,7 @@
       } finally {
         pendingWidgetMounts.delete(rootId);
       }
-    })();
+    });
     pendingWidgetMounts.set(rootId, mounting);
     return mounting;
   }
