@@ -129,6 +129,8 @@ test("failed upload keeps the selected file for retry with the same diary ID", a
   const editor = await env.window.PhotoUI.mountEditor({ root: env.root, groupId: 4, diaryId: null });
   const input = env.find("photo-widget-input"); input.files = [new Blob(["new image"])]; await input.dispatch("change");
   await assert.rejects(editor.save(7), /offline/);
+  assert.equal(input.disabled, false);
+  assert.equal(env.find("photo-widget-state").disabled, false);
   assert.equal(editor.isDirty(), true);
   assert.equal(env.find("photo-widget-image").src, "blob:1");
   const saved = await editor.save(7);
@@ -176,4 +178,92 @@ test("remount destroys previous listeners and object URLs", async () => {
   first.destroy();
   second.destroy();
   assert.equal(env.root.children.length, 0);
+});
+
+test("pending upload locks selection and saves the preview of the submitted file", async () => {
+  const pending = deferred();
+  const env = setup({ handlers: { upload: () => pending.promise } });
+  const editor = await env.window.PhotoUI.mountEditor({ root: env.root, groupId: 4 });
+  const input = env.find("photo-widget-input");
+  input.files = [new Blob(["image A"])];
+  await input.dispatch("change");
+  const saving = editor.save(7);
+  const locked = [input, env.find("photo-widget-state"), env.find("photo-widget-retry")].map(el => el.disabled);
+  input.files = [new Blob(["image B"])];
+  await input.dispatch("change");
+  await input.dispatch("cancel");
+  await env.find("photo-widget-state").click();
+  pending.resolve(photo);
+  await saving;
+  assert.deepEqual(locked, [true, true, true]);
+  assert.equal(await env.calls.find(call => call[0] === "upload")[2].get("file").text(), "image A");
+  assert.equal(env.find("photo-widget-image").src, "blob:1");
+  assert.equal(env.created.length, 1, "a blocked selection must not replace the submitted preview");
+  assert.equal(editor.isDirty(), false);
+  assert.equal(input.disabled, false);
+  editor.destroy();
+});
+
+test("concurrent saves share a single upload request", async () => {
+  const pending = deferred();
+  const env = setup({ handlers: { upload: () => pending.promise } });
+  const editor = await env.window.PhotoUI.mountEditor({ root: env.root, groupId: 4 });
+  const input = env.find("photo-widget-input");
+  input.files = [new Blob(["one upload"])];
+  await input.dispatch("change");
+  const first = editor.save(7);
+  const second = editor.save(7);
+  pending.resolve(photo);
+  const results = await Promise.all([first, second]);
+  assert.deepEqual(results.map(result => result?.id), [photo.id, photo.id]);
+  assert.equal(env.calls.filter(call => call[0] === "upload").length, 1);
+  assert.equal(env.find("photo-widget-image").src, "blob:1");
+  editor.destroy();
+});
+
+for (const operation of ["upload", "delete"]) {
+  test(`destroy ignores late ${operation} completion without changing the detached preview`, async () => {
+    const pending = deferred();
+    const env = setup({ metadata: photo, handlers: { [operation]: () => pending.promise } });
+    const editor = await env.window.PhotoUI.mountEditor({ root: env.root, groupId: 4, diaryId: 7 });
+    if (operation === "upload") {
+      const input = env.find("photo-widget-input");
+      input.files = [new Blob(["replacement"])];
+      await input.dispatch("change");
+    } else {
+      await env.find("photo-widget-state").click();
+    }
+    const saving = editor.save(7);
+    await flush();
+    const preview = env.find("photo-widget-preview");
+    const child = preview.children[0];
+    editor.destroy();
+    pending.resolve(operation === "upload" ? photo : { success: true, data: null });
+    await saving;
+    assert.equal(env.root.children.length, 0);
+    assert.equal(preview.children[0], child, "a destroyed editor must not render a late response");
+    assert.equal(env.revoked.length, env.created.length);
+    assert.equal(new Set(env.revoked).size, env.revoked.length);
+  });
+}
+
+test("a stale metadata retry cannot replace a newly saved photo", async () => {
+  const pending = deferred();
+  let reads = 0;
+  const env = setup({ handlers: { get: () => {
+    if (++reads === 1) throw new Error("offline");
+    return pending.promise;
+  } } });
+  const editor = await env.window.PhotoUI.mountEditor({ root: env.root, groupId: 4, diaryId: 7 });
+  await env.find("photo-widget-retry").click();
+  const input = env.find("photo-widget-input");
+  input.files = [new Blob(["new photo"])];
+  await input.dispatch("change");
+  await editor.save(7);
+  pending.resolve({ success: true, data: null });
+  await flush();
+  assert.equal(env.find("photo-widget-image")?.src, "blob:1");
+  assert.equal((await editor.save(7))?.id, photo.id);
+  assert.equal(env.revoked.length, 0);
+  editor.destroy();
 });
