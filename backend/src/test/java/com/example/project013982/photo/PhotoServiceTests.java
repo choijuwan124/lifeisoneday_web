@@ -115,6 +115,31 @@ class PhotoServiceTests {
     }
 
     @Test
+    void metadataLookupFailureRemovesNewFileAndPreservesExistingPhoto() throws Exception {
+        Path uploadRoot = temp.resolve("lookup-failure-uploads");
+        Files.createDirectories(uploadRoot);
+        String oldKey = "123e4567-e89b-12d3-a456-426614174000.png";
+        byte[] oldBytes = png();
+        Files.write(uploadRoot.resolve(oldKey), oldBytes);
+        allowAuthor();
+        when(repository.findByDiaryId(DIARY)).thenThrow(new IllegalStateException("metadata lookup failed"));
+        PhotoStorage realStorage = new PhotoStorage(uploadRoot.toString());
+        PhotoCleanupService realCleanup = new PhotoCleanupService(repository, realStorage, uploadRoot.toString());
+        PhotoService realService = new PhotoService(repository, realStorage, realCleanup);
+        TransactionSynchronizationManager.initSynchronization();
+
+        assertThrows(IllegalStateException.class, () -> realService.replace(ME, GROUP, DIARY,
+                new MockMultipartFile("file", "new.png", "image/png", png())));
+        TransactionSynchronizationManager.getSynchronizations().forEach(s -> s.afterCompletion(1));
+
+        try (var files = Files.list(uploadRoot)) {
+            assertEquals(List.of(oldKey), files.map(file -> file.getFileName().toString()).toList());
+        }
+        assertArrayEquals(oldBytes, Files.readAllBytes(uploadRoot.resolve(oldKey)));
+        verify(repository, never()).save(any(), anyString(), anyString(), anyLong());
+    }
+
+    @Test
     void deleteOfAbsentPhotoIsIdempotentAfterAuthorization() {
         allowAuthor();
         when(repository.findByDiaryId(DIARY)).thenReturn(Optional.empty());
