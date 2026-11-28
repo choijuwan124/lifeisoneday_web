@@ -154,6 +154,7 @@
       photoRetry.setAttribute("aria-busy", "true");
       setPhotoStatus("일기는 저장됐습니다. 사진을 다시 저장하고 있습니다.");
       try {
+        await api("post", `/api/groups/${groupId}/diaries`, {title: title.value.trim(), content: content.value});
         await editor.save(createdDiaryId);
         photoRetryArea.hidden = true;
         setPhotoStatus("");
