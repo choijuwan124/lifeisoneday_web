@@ -6,11 +6,20 @@
 <title>일기 상세 | Life Is One Day</title>
 <link rel="stylesheet" href="../css/style.css">
 <link rel="stylesheet" href="diary.css">
+<link rel="stylesheet" href="../like/like.css">
+<link rel="stylesheet" href="../comment/comment.css">
+<link rel="stylesheet" href="../photo/photo.css">
 <script src="../js/api.js" defer>
 </script>
-    <script src="../js/app.js" defer>
+<script src="../js/app.js" defer>
 </script>
-    <script src="../auth/logout.js" defer>
+<script src="../auth/logout.js" defer>
+</script>
+<script src="../like/like.js" defer>
+</script>
+<script src="../comment/comment.js" defer>
+</script>
+<script src="../photo/photo.js" defer>
 </script>
 <script src="diary.js" defer>
 </script>
@@ -46,6 +55,15 @@
 </dl>
 <p id="diary-detail-content" class="diary-content">
 </p>
+<section class="diary-social-section" aria-label="일기 사진">
+<div id="diary-photo-root"></div>
+</section>
+<section class="diary-social-section" aria-label="좋아요">
+<div id="diary-like-root"></div>
+</section>
+<section class="diary-social-section" aria-label="댓글">
+<div id="diary-comment-root"></div>
+</section>
 <div id="diary-owner-actions" class="diary-actions" hidden>
 <a id="diary-edit-link" class="button" href="diary-edit.html">수정</a>
 <button id="diary-delete" class="button diary-danger" type="button">삭제</button>
