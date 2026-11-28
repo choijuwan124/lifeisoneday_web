@@ -12,6 +12,7 @@
   const error = byId("diary-error");
   const detailWidgets = new Map();
   const pendingWidgetMounts = new Map();
+  let detailPageAlive = true;
   function showError(message) {
     if (!error) return;
     error.textContent = message;
@@ -53,9 +54,13 @@
       try {
         if (typeof ui?.[method] !== "function") throw new Error(`${label} 기능을 준비하지 못했습니다.`);
         const widget = await ui[method]({root, groupId, diaryId});
-        if (widget?.destroy) detailWidgets.set(rootId, widget);
+        if (widget?.destroy) {
+          if (detailPageAlive) detailWidgets.set(rootId, widget);
+          else widget.destroy();
+        }
         return widget;
       } catch (widgetError) {
+        if (!detailPageAlive) return null;
         const message = document.createElement("p");
         message.className = "diary-widget-fallback";
         message.setAttribute("role", "status");
@@ -70,6 +75,7 @@
     return mounting;
   }
   function destroyDetailWidgets() {
+    detailPageAlive = false;
     for (const widget of detailWidgets.values()) widget.destroy?.();
     detailWidgets.clear();
   }
@@ -136,6 +142,7 @@
     try {
       if (typeof window.PhotoUI?.mountEditor !== "function") throw new Error("사진 편집기를 준비하지 못했습니다.");
       editor = await window.PhotoUI.mountEditor({root: byId("diary-photo-editor-root"), groupId, diaryId: null});
+      if (typeof window.addEventListener === "function") window.addEventListener("pagehide", () => editor?.destroy?.(), {once: true});
     } catch (photoError) {
       setPhotoStatus(`${photoError.message || "사진 편집기를 불러오지 못했습니다."} 일기만 저장한 뒤 수정 화면에서 사진을 추가할 수 있습니다.`);
     }
@@ -261,6 +268,7 @@
       try {
         if (typeof window.PhotoUI?.mountEditor !== "function") throw new Error("사진 편집기를 준비하지 못했습니다.");
         editor = await window.PhotoUI.mountEditor({root: byId("diary-photo-editor-root"), groupId, diaryId});
+        if (typeof window.addEventListener === "function") window.addEventListener("pagehide", () => editor?.destroy?.(), {once: true});
       } catch (photoError) {
         setPhotoStatus(`${photoError.message || "사진 편집기를 불러오지 못했습니다."} 일기 내용은 수정할 수 있습니다.`);
       }
