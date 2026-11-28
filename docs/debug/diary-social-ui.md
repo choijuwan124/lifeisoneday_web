@@ -4,6 +4,32 @@
 브랜치: `feat/diary-social-ui`
 기준: `main`에서 분기. 병합은 수행하지 않음.
 
+## 주완의 병합 전 검토·수정 — 2026-11-28
+
+아래는 의도적으로 주입한 실습 오류가 아니라 PR #32 검토에서 실제로 발견한 문제다.
+
+1. **사진 초기 조회 중 수정 폼 기본 제출**: 사진 편집기를 기다리는 동안 수정 폼이 이미 표시되지만 submit 핸들러가 없었다. 실제 Chrome에서 저장을 누르면 PUT 없이 `?title=DRAFT_TITLE&content=DRAFT_BODY`로 이동해 비공개 본문이 URL에 들어가고 일기 ID를 잃었다. 비동기 초기화 전에 기본 제출을 차단하고, 실제 저장 핸들러 연결까지 저장 버튼을 비활성화했다. 작성 화면에도 같은 초기화 보호를 적용했다.
+2. **좋아요 지연이 댓글·사진까지 차단**: 위젯 mount를 차례로 await해서 좋아요 GET이 대기 중이면 댓글·사진을 생성하지 않았다. 세 위젯을 독립적으로 시작하고 각 결과를 처리하도록 변경했다.
+
+- 재현 검사 커밋: `ccd05bc`. `scripts/test-diary-social-browser.mjs` 추가. 수정 전 정상 시나리오 2건 통과, 위 오류 2건 실패.
+- 수정 커밋: `5887eb7`. `frontend/diary/diary.js` 한 파일 수정. 같은 Chrome 검사 4건 모두 통과.
+- 초기 사진 조회 중 저장을 눌러도 원래 URL과 입력이 유지되고, 조회 완료 후 실제 저장이 정상 수행되는지 확인했다.
+- 좋아요 요청을 보류한 상태에서도 댓글과 사진 DOM·API 요청이 독립적으로 생성되는지 확인했다.
+- 정상 상세 사진·좋아요·댓글 작성/수정/삭제, 생성 후 사진 실패 재시도, 375px·1280px 가로 넘침도 확인했다.
+- 검증은 실제 제출 HTML/JS/CSS를 Chrome에서 실행하고 API 응답·지연만 로컬 대역으로 제어했다. 이 검사는 실제 DB 통합 검사가 아니다.
+- 검토 환경의 전체 빌드: Java 77건 통과, frontend Node 59건 통과, Chrome 4건 통과. 합계 140건. 아래 민제 최초 환경의 Mockito 실패 기록과 구분한다.
+- 기존 실습 3건의 기록과 커밋을 유지했다. 이번 검토에서 과거 오류 주입 커밋을 다시 실행하지 않았다.
+
+새 Chrome 검사 실행 (Node 22 이상, Chrome/Chromium 필요):
+
+```powershell
+node --test scripts/test-diary-social-browser.mjs
+```
+
+Chrome이 기본 경로에 없다면 `CHROME_BIN`에 실행 파일 경로를 지정한다. 임시 브라우저 프로필·API 서버·사진 파일은 검사 종료 후 정리된다. 선택적으로 `DIARY_BROWSER_ARTIFACTS`에 Git 제외 폴더를 지정하면 화면 이미지를 저장한다.
+
+## 민제 최초 개발·검증 기록
+
 ## 구현 범위
 
 - `frontend/diary/diary-detail.html`: 기존 일기 내용과 작성자/액션 영역을 유지하면서 좋아요, 댓글, 사진 영역을 추가하고 `api.js → app.js → auth/logout.js → like.js → comment.js → photo.js → diary.js` 순으로 로드한다.
