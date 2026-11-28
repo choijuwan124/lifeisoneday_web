@@ -182,7 +182,7 @@
         createdDiaryId = id;
         lockCreatedDiaryFields();
         if (editor?.isDirty?.()) setPhotoStatus("일기를 저장했습니다. 사진을 저장하는 중입니다.");
-        await editor?.save(id);
+        editor?.save(id);
         setPhotoStatus("");
         photoRetryArea.hidden = true;
         window.location.assign(diaryUrl("diary-detail.html", id));
