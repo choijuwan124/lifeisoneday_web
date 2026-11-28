@@ -49,8 +49,9 @@ class PhotoStorageTests {
                 () -> storage.store(file("x.jpg", "image/jpeg", "not an image".getBytes())));
         PhotoStorage.StoredPhoto actualPng = storage.store(file("x.gif", "image/gif", image("png", 2, 2)));
         assertEquals("image/png", actualPng.contentType(), "actual image content decides the stored type");
-        assertThrows(PhotoStorage.UnsupportedPhotoException.class,
+        PhotoStorage.UnsupportedPhotoException tooManyPixels = assertThrows(PhotoStorage.UnsupportedPhotoException.class,
                 () -> storage.store(file("x.png", "image/png", hugePngHeader(5000, 4001))));
+        assertEquals("사진 크기는 최대 20메가픽셀까지 지원합니다.", tooManyPixels.getMessage());
     }
 
     @Test
