@@ -53,7 +53,7 @@ editor.destroy();
 | `PhotoServiceTests` | Mockito 저장소 대역의 권한·DB 오류 정리·트랜잭션 callback | 통과; 실제 DB 롤백이 아님 |
 | `PhotoControllerTests` | MockMvc 세션·JSON·multipart·바이너리 헤더·상태 | 통과 |
 | `frontend/tests/photo.test.mjs` | Node DOM/API 대역의 선택·취소·교체·재시도·URL·destroy | 통과 |
-| 전체 Gradle 빌드 | 기존 기능 포함 Java 74건 | 통과 |
+| 전체 Gradle 빌드 | 기존 기능 포함 Java 76건 | 통과 |
 | 전체 Node 회귀 검사 | 기존 기능 포함 42건 | 통과 |
 | `scripts/test-photos-http.mjs` | 격리 MySQL + 앱 세션 쿠키 + 실제 HTTP 이미지 파일 | 미실행; 이 PC의 격리 DB/app이 준비되지 않음 |
 | 실제 Chrome 파일 선택·미리보기 | 실제 브라우저 UI | 미실행; API 대역 Node 검사만 수행 |
