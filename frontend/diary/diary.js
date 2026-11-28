@@ -53,7 +53,7 @@
     const mounting = Promise.resolve().then(async () => {
       try {
         if (typeof ui?.[method] !== "function") throw new Error(`${label} 기능을 준비하지 못했습니다.`);
-        const widget = await ui[method]({root, groupId, diaryId});
+        const widget = await ui[method]({root, groupId: undefined, diaryId});
         if (widget?.destroy) {
           if (detailPageAlive) detailWidgets.set(rootId, widget);
           else widget.destroy();
