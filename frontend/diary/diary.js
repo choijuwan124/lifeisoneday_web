@@ -121,6 +121,9 @@
     const photoStatus = byId("diary-photo-save-status");
     const photoRetryArea = byId("diary-photo-retry-area");
     const photoRetry = byId("diary-photo-retry");
+    // Block native GET submission before any asynchronous editor initialization.
+    form.addEventListener("submit", event => event.preventDefault());
+    submit.disabled = true;
     if (!groupId) { form.hidden = true; showError("일기장 번호가 올바르지 않습니다."); return; }
     cancel.href = groupUrl("diary-list.html");
     let pending = false;
@@ -200,6 +203,7 @@
         if (!createdDiaryId && !postSucceededWithoutId) submit.disabled = false;
       }
     });
+    submit.disabled = false;
   }
   async function loadDetail() {
     const loading = byId("diary-loading");
@@ -228,9 +232,11 @@
       }
       loading.hidden = true;
       byId("diary-detail").hidden = false;
-      await mountDetailWidget("diary-like-root", window.LikeUI, "mount", "좋아요");
-      await mountDetailWidget("diary-comment-root", window.CommentUI, "mount", "댓글");
-      await mountDetailWidget("diary-photo-root", window.PhotoUI, "mountViewer", "사진");
+      await Promise.allSettled([
+        mountDetailWidget("diary-like-root", window.LikeUI, "mount", "좋아요"),
+        mountDetailWidget("diary-comment-root", window.CommentUI, "mount", "댓글"),
+        mountDetailWidget("diary-photo-root", window.PhotoUI, "mountViewer", "사진"),
+      ]);
     } catch (e) { loading.hidden = true; showError(e.message || "일기를 불러오지 못했습니다."); }
   }
   async function initEdit() {
@@ -242,6 +248,9 @@
     const photoStatus = byId("diary-photo-save-status");
     const photoRetryArea = byId("diary-photo-retry-area");
     const photoRetry = byId("diary-photo-retry");
+    // Keep the visible form inert while its current photo is loading.
+    form.addEventListener("submit", event => event.preventDefault());
+    submit.disabled = true;
     let editor = null;
 
     function setPhotoStatus(message) {
@@ -326,6 +335,7 @@
           if (diaryPutSucceeded) lockDiaryFields();
         }
       });
+      submit.disabled = false;
     } catch (e) { loading.hidden = true; showError(e.message || "일기를 불러오지 못했습니다."); }
   }
   if (byId("diary-list")) loadList();
